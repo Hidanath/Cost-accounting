@@ -1,4 +1,44 @@
 import eel, sqlite3, datetime
+from os import mkdir
+
+try:
+    with sqlite3.connect("db/database.db") as db: #Проверка существует ли база данных
+        cursor = db.cursor()
+        try:
+            cursor.execute("SELECT * FROM expenses")
+            print("База расходов обнаруженна")
+        except: #Если выходит ошибка то создаётся база данных по шаблону
+            cursor.execute("CREATE TABLE expenses(title TEXT, price FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            print("База расходов не была обнаруженна поэтому была созданна новая по шаблону")
+
+        try:
+            cursor.execute("SELECT * FROM users")
+            print("База пользователей обнаруженна")
+        except: #Если выходит ошибка то создаётся база данных по шаблону
+            cursor.execute("CREATE TABLE users(username TEXT, income INTEGER, balance FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            print("База пользователей не была обнаруженна поэтому была созданна новая по шаблону")
+        
+        cursor.close()
+
+except:
+    mkdir("db")
+    with sqlite3.connect("db/database.db") as db: #Проверка существует ли база данных
+        cursor = db.cursor()
+        try:
+            cursor.execute("SELECT * FROM expenses")
+            print("База расходов обнаруженна")
+        except: #Если выходит ошибка то создаётся база данных по шаблону
+            cursor.execute("CREATE TABLE expenses(title TEXT, price FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            print("База расходов не была обнаруженна поэтому была созданна новая по шаблону")
+
+        try:
+            cursor.execute("SELECT * FROM users")
+            print("База пользователей обнаруженна")
+        except: #Если выходит ошибка то создаётся база данных по шаблону
+            cursor.execute("CREATE TABLE users(username TEXT, income INTEGER, balance FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            print("База пользователей не была обнаруженна поэтому была созданна новая по шаблону")
+        
+        cursor.close()
 
 eel.init("web")
 balance = 0 #Баланс
