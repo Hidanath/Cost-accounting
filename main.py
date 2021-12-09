@@ -45,7 +45,7 @@ balance = 0 #Баланс
 income = 0 #Заработок
 
 @eel.expose
-def start():
+def start(id):
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
 
@@ -57,18 +57,17 @@ def start():
 
         db.commit()
         #Получение и проверка баланса
-        getBalance()
+        getBalance(id)
         eel.setBalance(balance) #Установка баланса на сайте      
 
-def getBalance(): #Получение баланса и заработка
+def getBalance(id): #Получение баланса и заработка
     global balance, income
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM users")
+        cursor.execute("SELECT balance, income FROM users WHERE id = ?", (id, ))
         info = cursor.fetchall()
-        for row in info:
-            income = row[1] #Заработок
-            balance = row[2] #Баланс
+        balance = info[0][0] #Баланс
+        income = info[0][1] #Заработок
 
 def updateBalanceInDB(balance): #Запись нового баланса в бд
     with sqlite3.connect("db/database.db") as db:
@@ -131,32 +130,56 @@ def add(title, price): #Добавление новой записи
         eel.setBalance(balance) #Установка баланса на сайте
 
 @eel.expose
-def getUser(): #Получение данных пользователя
+def getUser(id): #Получение данных пользователя
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM users") #Общая выборка
+        cursor.execute("SELECT * FROM users WHERE id = ?", (id, )) #Общая выборка
         info = cursor.fetchall() #Получение ответа
         data = [] #Массив ответа
         for row in info:
             data.append(row[0])
             data.append(row[1])
+            data.append(row[2])
             data.append(row[3])
             data.append(row[4])
+            data.append(row[5])
+            data.append(row[6])
 
         return data #Отправка ответа в js
 
 @eel.expose
-def setUser(username, income, date, id): #Обновление значений пользователя
+def setUser(name, username, password, income, date, id): #Обновление значений пользователя
     global balance
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
         cursor.execute("SELECT income FROM users WHERE id = ?", (id, )) #Выборка заработка по id пользователя
         balance -= cursor.fetchall()[0][0] #Отнимаем от баланса цену записи
         db.commit()
-        cursor.execute("UPDATE users SET username = ?, income = ?, date = ?  WHERE id = ?", (username, income, date, id, )) #Обновление значений по id 
+        cursor.execute("UPDATE users SET name = ?, username = ?, password = ?, income = ?, date = ?  WHERE id = ?", (name, username, password, income, date, id, )) #Обновление значений по id 
         db.commit()
         balance += float(income) #Прибавляем к балансу цену записи
         updateBalanceInDB(balance) #Обновление значений в бд
         eel.setBalance(balance) #Установка баланса на сайте
+
+@eel.expose
+def newUser(name, username, password, income, date):
+    with sqlite3.connect("db/database.db"):
+        cursor = db.cursor()
+        cursor.execute("INSERT INTO users(name, username, password, income, balance, date) VALUES(?,?,?,?,?,?)", (name, username, password, income, income, date))
+        db.commit()
+        cursor.execute("SELECT id FROM users WHERE username = ? AND income = ? AND balance = ? AND date = ? ", (username, income, income, date))
+        id = cursor.fetchall()[0][0]
+        return id
+
+@eel.expose
+def checkLogin(username, password):
+    with sqlite3.connect("db/database.db") as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
+        info = cursor.fetchall()
+        if len(info) == 0:
+            return False
+        else:
+            return [True, info[0][0]]
 
 eel.start("index.html", mode="default")

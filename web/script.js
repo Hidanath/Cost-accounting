@@ -2,7 +2,16 @@ let globalId = 0 //Переменная для передачи id между ф
 let globalUser = []
 let alerts = 0
 window.onload = async function(){ //При полной загрузке страницы запуск python функции
-    await eel.start();
+    if (localStorage.getItem("id") != null){
+        globalId = localStorage.getItem("id")
+        await eel.start(globalId);
+        globalUser = await eel.getUser(globalId)()
+        openSettings()
+    }
+    else{
+        document.getElementsByClassName("sidenav")[0].style.display = "none"
+        document.location = "#modalRegister"
+    }
 }
 
 eel.expose(addToTable) //Декоратор чтобы функцию можно было вызвать из python
@@ -103,29 +112,32 @@ async function addNote(){
 }
 
 async function openSettings(){
-    let user = await eel.getUser()() //Получение данных о пользователе из python
-    globalUser = user
+    let modal = document.getElementById("modalSettings")
     //Установка значений в поля
-    document.getElementsByClassName("usernameEdit")[0].value = user[0] 
-    document.getElementsByClassName("incomeEdit")[0].value = user[1]
-    document.getElementsByClassName("dateEdit")[0].value = user[2]
+    modal.getElementsByClassName("name")[0].value = globalUser[0] 
+    modal.getElementsByClassName("login")[0].value = globalUser[1]
+    modal.getElementsByClassName("password")[0].value = globalUser[2]
+    modal.getElementsByClassName("incomeEdit")[0].value = globalUser[3]
+    modal.getElementsByClassName("dateEdit")[0].value = globalUser[5]
 }
 
 async function setUserValue(){
-    let username = document.getElementsByClassName("usernameEdit")[0].value
+    let name = document.getElementsByClassName("name")[0].value
+    let login = document.getElementsByClassName("login")[0].value
+    let password = document.getElementsByClassName("password")[0].value
     let income = document.getElementsByClassName("incomeEdit")[0].value
     let date = document.getElementsByClassName("dateEdit")[0].value
     let alertWarn = document.getElementById("modalSettings").getElementsByClassName("alert")[0] //Получение уведомления для modalSettings
-    if(username == globalUser[0] && income == globalUser[1] && date == globalUser[2]){
+    if(name == globalUser[0] && login == globalUser[1] && password == globalUser[2] && income == globalUser[3] && date == globalUser[5]){
         alertWarn.innerHTML = 'Значения идентичны'
         alertWarn.style.display = "block" //Отображение уведомления
     }
-    else if (!username.trim() || !income.trim()){
-        alertWarn.innerHTML = 'Заполните поля "Имя" и "Зарплата"'
+    else if (!name.trim() || !income.trim() || !login.trim() || !password.trim()){
+        alertWarn.innerHTML = 'Заполните поля "Имя", "Логин", "Пароль и "Зарплата"'
         alertWarn.style.display = "block" //Отображение уведомления
     }
     else{
-        await eel.setUser(username, income, date, globalUser[3]) //Установка значений в бд
+        await eel.setUser(name, login, password, income, date, globalId) //Установка значений в бд
         newMessage("Настройки успешно обновленны") //Отправка нового сообщения
         alertWarn.style.display = "none"
         document.location = "#"
@@ -166,4 +178,52 @@ function deleteMessage(element){
         element.parentElement.remove() //Удаление сообщения
     }
     alerts -= 1 //Минус один alert т.к. удаляется одно сообщение
+}
+
+async function register(){
+    let modal = document.getElementById("modalRegister")
+    let name = modal.getElementsByClassName("name")[0].value
+    let username = modal.getElementsByClassName("usernameRegister")[0].value
+    let password = modal.getElementsByClassName("password")[0].value
+    let income = modal.getElementsByClassName("incomeRegister")[0].value
+    let date = modal.getElementsByClassName("dateRegister")[0].value
+
+    if (!username.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()){
+        modal.getElementsByClassName("alert")[0].innerHTML = "Заполните все поля"
+        modal.getElementsByClassName("alert")[0].style.display = "block"
+    }
+    else{
+        modal.getElementsByClassName("alert")[0].display = "none"
+        globalId = await eel.newUser(name, username, password, income, date)()
+        localStorage.setItem("id", globalId)
+        await eel.start(globalId)
+        globalUser = await eel.getUser(globalId)()
+        document.getElementsByClassName("sidenav")[0].style.display = "block"
+        console.log(globalId)
+        document.location = "#"
+    }
+}
+
+async function login(){
+    let modal = document.getElementById("modalLogin")
+    let username = modal.getElementsByClassName("login")[0].value
+    let password = modal.getElementsByClassName("password")[0].value
+
+    if(!username.trim() || !password.trim()){
+        console.log("GG")
+    }
+    else{
+        let anwer = await eel.checkLogin(username, password)()
+        if(anwer[0]){
+            globalUser = await eel.getUser(anwer[1])() // Указать id замена 1
+            globalId = globalUser[6]
+            localStorage.setItem("id", globalId)
+            await eel.start(globalId)
+            document.getElementsByClassName("sidenav")[0].style.display = "block"
+            document.location = "#"
+        }
+        else{
+            console.log("Пользователь ненайден")
+        }
+    }
 }

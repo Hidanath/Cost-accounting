@@ -64,8 +64,14 @@
             <div class="modal" id="modalSettings">
                 <div class="modalContent">
                     <p class="modalTitle">Настройки</p>
-                    <label for="usernameEdit", class="usernameLabel">Введите имя:</label>
-                    <input type="text" class="usernameEdit" placeholder="Имя">
+                    <label for="name">Введите имя:</label>
+                    <input type="text" class="name" placeholder="Имя">
+                    
+                    <label for="login">Введите логин:</label>
+                    <input type="text" class="login" placeholder="Логин">
+
+                    <label for="password">Введите пароль:</label>
+                    <input type="password" class="password" placeholder="Пароль">
 
                     <label for="incomeEdit" class="incomeLabel">Введите зарплату:</label>
                     <input type="number" class="incomeEdit" placeholder="Зарплата">
@@ -75,6 +81,41 @@
 
                     <button class="save" onclick="setUserValue()">Сохранить изменения</button>
                     <button class="close" onclick="document.location = '#'; document.getElementById('modalSettings').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
+
+                    <div class="alert"></div>
+                </div>
+            </div>
+            <div class="modal" id="modalLogin">
+                <div class="modalContent">
+                    <p class="modalTitle">Вход</p>
+                    <label for="login">Введите логин</label>
+                    <input type="text" class="login" placeholder="Введите логин">
+                    <label for="password">Введите пароль</label>
+                    <input type="password" class="password" placeholder="Введите пароль">
+                    <button class="loginButton" onclick="login()">Войти</button>
+                    <button class="loginButton" onclick="document.location = '#modalRegister'">Зарегестрироваться</button>
+                </div>
+            </div>
+            <div class="modal" id="modalRegister">
+                <div class="modalContent">
+                    <p class="modalTitle">Регистрация</p>
+                    <label for="name">Введите имя</label>
+                    <input type="text" class="name" placeholder="Введите имя">
+
+                    <label for="usernameRegister">Введите логин</label>
+                    <input type="text" class="usernameRegister" placeholder="Введите логин">
+
+                    <label for="password">Введите пароль</label>
+                    <input type="password" class="password" placeholder="Введите пароль">
+
+                    <label for="incomeRegister">Введите вашу зарплату</label>
+                    <input type="number" class="incomeRegister" placeholder="Введите зарплату">
+
+                    <label for="dateRegister">Введите дату получения зарплаты</label>
+                    <input type="date" class="dateRegister" placeholder="Введите дату">
+
+                    <button class="loginButton" onclick="register()">Зарегестрироваться</button>
+                    <button class="loginButton" onclick="document.location = '#modalLogin'">Войти</button>
 
                     <div class="alert"></div>
                 </div>

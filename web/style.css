@@ -99,7 +99,7 @@ input:focus{
       cursor: pointer;
       transition: 0.3s;
   }
-  
+
   .delete{
       background-color: #F34642;
   }
@@ -110,6 +110,12 @@ input:focus{
   
   .closeModalAdd{
       background-color: #F34642;    
+  }
+
+  .loginButton{
+      width: 49.6%;
+      height: 45px;
+      margin-top: 10px;
   }
   
   .modalTitle{
@@ -158,6 +164,24 @@ input:focus{
     font-size: 25px;
 }
 
+#modalRegister .modalContent .alert {
+    padding: 15px;
+    background-color: #f44336; /* Red */
+    color: white;
+    margin-top: 4%;
+    border-radius: 12px;
+    display: none;
+    text-align: center;
+    font-size: 25px;
+}
+
+#modalLogin{
+    background-color: black;
+}
+
+#modalRegister{
+    background-color: black;
+}
 .downAlert{
     padding: 22px;
     background-color: #A7D155; /* Red */
