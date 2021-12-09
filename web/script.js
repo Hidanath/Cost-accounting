@@ -181,76 +181,68 @@ function deleteMessage(element){
 }
 
 async function register(){
-    let modal = document.getElementById("modalRegister")
-    let name = modal.getElementsByClassName("name")[0].value
-    let username = modal.getElementsByClassName("usernameRegister")[0].value
-    let password = modal.getElementsByClassName("password")[0].value
-    let income = modal.getElementsByClassName("incomeRegister")[0].value
-    let date = modal.getElementsByClassName("dateRegister")[0].value
+    let modal = document.getElementById("modalRegister") //Ссылка на modal окно
+    let name = modal.getElementsByClassName("name")[0].value //Получение имени
+    let username = modal.getElementsByClassName("usernameRegister")[0].value //Получение логина
+    let password = modal.getElementsByClassName("password")[0].value //Получение пароля
+    let income = modal.getElementsByClassName("incomeRegister")[0].value //Получение зп
+    let date = modal.getElementsByClassName("dateRegister")[0].value //Получение даты
 
-    let isLoginFree = await eel.isLoginFree(username)()
+    let isLoginFree = await eel.isLoginFree(username)() //Проверка свободен ли логин
 
-    if (!username.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()){
+    if (!username.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()){ //Проверка на пустые строки
         modal.getElementsByClassName("alert")[0].innerHTML = "Заполните все поля"
         modal.getElementsByClassName("alert")[0].style.display = "block"
     }
-    else if(isLoginFree == false){
+    else if(isLoginFree == false){ //Проверка на занятость логина
         modal.getElementsByClassName("alert")[0].innerHTML = "Логин занят выберите другой"
         modal.getElementsByClassName("alert")[0].style.display = "block"
     }
     else{
-        modal.getElementsByClassName("alert")[0].display = "none"
-        globalId = await eel.newUser(name, username, password, income, date)()
-        localStorage.setItem("id", globalId)
-        clearTable()
-        await eel.start(globalId)
-        globalUser = await eel.getUser(globalId)()
-        document.getElementsByClassName("sidenav")[0].style.display = "flex"
-        console.log(globalId)
-        document.location = "#"
+        globalId = await eel.newUser(name, username, password, income, date)() //Создание нового пользователя и получение в ответ его id
+        localStorage.setItem("id", globalId) //Установка id в localstorage
+        clearTable() //Очистка таблицы
+        await eel.start(globalId) //Вызов python стартовой функции
+        globalUser = await eel.getUser(globalId)() //Получение оставшихся данных пользователя по id
+        modal.getElementsByClassName("alert")[0].display = "none" //Отключение сообщения об ошибке
+        document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
+        document.location = "#" //Переход на главный экран
     }
 }
 
-function clearTable(){
-    for(let i = document.getElementsByClassName("rowExpenses").length - 1; i != 0; i--){
-        console.log(document.getElementsByClassName("rowExpenses")[i])
-        console.log(i)
-        if(i == document.getElementsByClassName("rowExpenses")){
-            console.log("GG")
-        }
-        else{            
-            document.getElementsByClassName("rowExpenses")[i].remove()
-        }
+function clearTable(){ // Удаление всех рядов кроме 1, то есть названий
+    for(let i = document.getElementsByClassName("rowExpenses").length - 1; i != 0; i--){ //i = количество рядов в таблице - 1, так как отсчёт с 0; выполняется пока i не равно 0; при каждой итерации i - 1       
+        document.getElementsByClassName("rowExpenses")[i].remove() //Удаление ряда
     }
 }
 
 async function login(){
-    let modal = document.getElementById("modalLogin")
-    let username = modal.getElementsByClassName("login")[0].value
-    let password = modal.getElementsByClassName("password")[0].value
-    let alert = modal.getElementsByClassName("alert")[0]
+    let modal = document.getElementById("modalLogin") //Ссылка на modal окно
+    let username = modal.getElementsByClassName("login")[0].value //Получение логина
+    let password = modal.getElementsByClassName("password")[0].value //Получение пароля
+    let alert = modal.getElementsByClassName("alert")[0] //Сообщение об ошибке
 
-    if(!username.trim() || !password.trim()){
+    if(!username.trim() || !password.trim()){ //Проверка на пустые значения
         alert.style.display = "block"
         alert.innerHTML = 'Заполните поля "Логин" и "Пароль"' 
 
     }
     else{
-        let anwer = await eel.checkLogin(username, password)()
-        if(anwer[0]){
-            globalUser = await eel.getUser(anwer[1])()
-            globalId = globalUser[6]
-            localStorage.setItem("id", globalId)
-            clearTable()
-            await eel.start(globalId)
+        let anwer = await eel.checkLogin(username, password)() //Проверка на существование пользователя; ответ массив формата [true, id] или при неправильных данных false
+        if(anwer[0]){ //Проверка есть ли такой пользователь
+            globalUser = await eel.getUser(anwer[1])() //Получение данных о пользователе из массива ответа
+            globalId = globalUser[6] //Установка globalId
+            localStorage.setItem("id", globalId) //Установка id в localstorage
+            clearTable() //Очистка таблицы
+            await eel.start(globalId) //Запуск python стартовой функции
             
-            alert.style.display = "none"
-            document.getElementsByClassName("sidenav")[0].style.display = "flex"
-            document.location = "#"
+            alert.style.display = "none" //Отключение уведомления об ошибке
+            document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
+            document.location = "#" //Переход на домашнюю страницу
         }
-        else{
+        else{ //Если пользователь не был найден
             alert.style.display = "block"
-            alert.innerHTML = 'Пользователь не найден' 
+            alert.innerHTML = 'Логин или пароль неверны' 
         }
     }
 }
