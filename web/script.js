@@ -188,19 +188,39 @@ async function register(){
     let income = modal.getElementsByClassName("incomeRegister")[0].value
     let date = modal.getElementsByClassName("dateRegister")[0].value
 
+    let isLoginFree = await eel.isLoginFree(username)()
+
     if (!username.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()){
         modal.getElementsByClassName("alert")[0].innerHTML = "Заполните все поля"
+        modal.getElementsByClassName("alert")[0].style.display = "block"
+    }
+    else if(isLoginFree == false){
+        modal.getElementsByClassName("alert")[0].innerHTML = "Логин занят выберите другой"
         modal.getElementsByClassName("alert")[0].style.display = "block"
     }
     else{
         modal.getElementsByClassName("alert")[0].display = "none"
         globalId = await eel.newUser(name, username, password, income, date)()
         localStorage.setItem("id", globalId)
+        clearTable()
         await eel.start(globalId)
         globalUser = await eel.getUser(globalId)()
-        document.getElementsByClassName("sidenav")[0].style.display = "block"
+        document.getElementsByClassName("sidenav")[0].style.display = "flex"
         console.log(globalId)
         document.location = "#"
+    }
+}
+
+function clearTable(){
+    for(let i = document.getElementsByClassName("rowExpenses").length - 1; i != 0; i--){
+        console.log(document.getElementsByClassName("rowExpenses")[i])
+        console.log(i)
+        if(i == document.getElementsByClassName("rowExpenses")){
+            console.log("GG")
+        }
+        else{            
+            document.getElementsByClassName("rowExpenses")[i].remove()
+        }
     }
 }
 
@@ -208,22 +228,29 @@ async function login(){
     let modal = document.getElementById("modalLogin")
     let username = modal.getElementsByClassName("login")[0].value
     let password = modal.getElementsByClassName("password")[0].value
+    let alert = modal.getElementsByClassName("alert")[0]
 
     if(!username.trim() || !password.trim()){
-        console.log("GG")
+        alert.style.display = "block"
+        alert.innerHTML = 'Заполните поля "Логин" и "Пароль"' 
+
     }
     else{
         let anwer = await eel.checkLogin(username, password)()
         if(anwer[0]){
-            globalUser = await eel.getUser(anwer[1])() // Указать id замена 1
+            globalUser = await eel.getUser(anwer[1])()
             globalId = globalUser[6]
             localStorage.setItem("id", globalId)
+            clearTable()
             await eel.start(globalId)
-            document.getElementsByClassName("sidenav")[0].style.display = "block"
+            
+            alert.style.display = "none"
+            document.getElementsByClassName("sidenav")[0].style.display = "flex"
             document.location = "#"
         }
         else{
-            console.log("Пользователь ненайден")
+            alert.style.display = "block"
+            alert.innerHTML = 'Пользователь не найден' 
         }
     }
 }

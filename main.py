@@ -182,4 +182,15 @@ def checkLogin(username, password):
         else:
             return [True, info[0][0]]
 
+@eel.expose
+def isLoginFree(username):
+    with sqlite3.connect("db/database.db") as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT id FROM users WHERE username = ?", (str(username), ))
+        info = cursor.fetchall()
+        if len(info) == 0:
+            return True
+        else:
+            return False
+
 eel.start("index.html", mode="default")
