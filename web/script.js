@@ -1,4 +1,5 @@
 let globalId = 0 //Переменная для передачи id между функциями
+let globalRowId = 0
 let globalUser = []
 let alerts = 0
 window.onload = async function(){ //При полной загрузке страницы запуск python функции
@@ -49,11 +50,11 @@ function modalEditSetValue(id){
     let priceEdit = document.getElementsByClassName("priceEdit") //Получение поля редактирования цены в модальном окне
     titleEdit[0].value = title[0].textContent //Установка названия в поле редактирования в модальном окне
     priceEdit[0].value = price[0].textContent //Установка цены в поле редактирования в модальном окне
-    globalId = id
+    globalRowId = id
 }
 
 async function updateValuesInDB(){
-    let row = document.getElementById(globalId) //Получение ряда по id 
+    let row = document.getElementById(globalRowId) //Получение ряда по id 
     let lastTitle = row.getElementsByClassName("title")[0].textContent //Получение названия в ряде
     let lastPrice = row.getElementsByClassName("price")[0].textContent //Получение цены в ряде
     let title = document.getElementsByClassName("titleEdit")[0].value //Получения значения из поля редактирования названия модального окна
@@ -69,9 +70,9 @@ async function updateValuesInDB(){
     }
 
     else{
-        await eel.updateValues(title, price, globalId) //Вызов python функции для обновления значений
-        document.getElementById(globalId).getElementsByClassName("title")[0].textContent = title //Обновления значения названия в таблице
-        document.getElementById(globalId).getElementsByClassName("price")[0].textContent = price //Обновления значения цены в таблице
+        await eel.updateValues(title, price, globalRowId) //Вызов python функции для обновления значений
+        document.getElementById(globalRowId).getElementsByClassName("title")[0].textContent = title //Обновления значения названия в таблице
+        document.getElementById(globalRowId).getElementsByClassName("price")[0].textContent = price //Обновления значения цены в таблице
         newMessage("Значения обновленны") //Отправка нового сообщения
         alertWarn.style.display = "none" //Скрытие уведомления
         document.location = "#" //Закрытие модального окна
@@ -81,8 +82,8 @@ async function updateValuesInDB(){
 async function deleteRowJS(){
     let result = confirm("Вы уверены что хотите удалить запись") //Подтверждение на удаление
     if (result == true){
-        await eel.deleteRow(globalId) //Вызов python функции для удаления ряда
-        document.getElementById(globalId).parentElement.removeChild(document.getElementById(globalId)) //Удаление ряда в таблице
+        await eel.deleteRow(globalRowId) //Вызов python функции для удаления ряда
+        document.getElementById(globalRowId).parentElement.removeChild(document.getElementById(globalRowId)) //Удаление ряда в таблице
         newMessage("Запись успешно удаленна") //Отправка нового сообщения
         document.location = "#" //Закрытие модального окна
 
@@ -136,9 +137,14 @@ async function setUserValue(){
         alertWarn.innerHTML = 'Заполните поля "Имя", "Логин", "Пароль и "Зарплата"'
         alertWarn.style.display = "block" //Отображение уведомления
     }
+    else if (login != globalUser[1] && await eel.isLoginFree(login)() == false){
+        alertWarn.innerHTML = 'Логин занят'
+        alertWarn.style.display = "block" //Отображение уведомления 
+    }
     else{
         await eel.setUser(name, login, password, income, date, globalId) //Установка значений в бд
         newMessage("Настройки успешно обновленны") //Отправка нового сообщения
+        globalUser = await eel.getUser(globalId)()
         alertWarn.style.display = "none"
         document.location = "#"
     }
@@ -183,14 +189,14 @@ function deleteMessage(element){
 async function register(){
     let modal = document.getElementById("modalRegister") //Ссылка на modal окно
     let name = modal.getElementsByClassName("name")[0].value //Получение имени
-    let username = modal.getElementsByClassName("usernameRegister")[0].value //Получение логина
+    let login = modal.getElementsByClassName("loginRegister")[0].value //Получение логина
     let password = modal.getElementsByClassName("password")[0].value //Получение пароля
     let income = modal.getElementsByClassName("incomeRegister")[0].value //Получение зп
     let date = modal.getElementsByClassName("dateRegister")[0].value //Получение даты
 
-    let isLoginFree = await eel.isLoginFree(username)() //Проверка свободен ли логин
+    let isLoginFree = await eel.isLoginFree(login)() //Проверка свободен ли логин
 
-    if (!username.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()){ //Проверка на пустые строки
+    if (!login.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()){ //Проверка на пустые строки
         modal.getElementsByClassName("alert")[0].innerHTML = "Заполните все поля"
         modal.getElementsByClassName("alert")[0].style.display = "block"
     }
@@ -199,7 +205,7 @@ async function register(){
         modal.getElementsByClassName("alert")[0].style.display = "block"
     }
     else{
-        globalId = await eel.newUser(name, username, password, income, date)() //Создание нового пользователя и получение в ответ его id
+        globalId = await eel.newUser(name, login, password, income, date)() //Создание нового пользователя и получение в ответ его id
         localStorage.setItem("id", globalId) //Установка id в localstorage
         clearTable() //Очистка таблицы
         await eel.start(globalId) //Вызов python стартовой функции
@@ -207,6 +213,13 @@ async function register(){
         modal.getElementsByClassName("alert")[0].display = "none" //Отключение сообщения об ошибке
         document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
         document.location = "#" //Переход на главный экран
+
+        //Сброс значений
+        modal.getElementsByClassName("name")[0].value = ""
+        modal.getElementsByClassName("loginRegister")[0].value = ""
+        modal.getElementsByClassName("password")[0].value = ""
+        modal.getElementsByClassName("incomeRegister")[0].value = ""
+        modal.getElementsByClassName("dateRegister")[0].value = ""
     }
 }
 
@@ -218,17 +231,17 @@ function clearTable(){ // Удаление всех рядов кроме 1, т�
 
 async function login(){
     let modal = document.getElementById("modalLogin") //Ссылка на modal окно
-    let username = modal.getElementsByClassName("login")[0].value //Получение логина
+    let login = modal.getElementsByClassName("login")[0].value //Получение логина
     let password = modal.getElementsByClassName("password")[0].value //Получение пароля
     let alert = modal.getElementsByClassName("alert")[0] //Сообщение об ошибке
 
-    if(!username.trim() || !password.trim()){ //Проверка на пустые значения
+    if(!login.trim() || !password.trim()){ //Проверка на пустые значения
         alert.style.display = "block"
         alert.innerHTML = 'Заполните поля "Логин" и "Пароль"' 
 
     }
     else{
-        let anwer = await eel.checkLogin(username, password)() //Проверка на существование пользователя; ответ массив формата [true, id] или при неправильных данных false
+        let anwer = await eel.checkLogin(login, password)() //Проверка на существование пользователя; ответ массив формата [true, id] или при неправильных данных false
         if(anwer[0]){ //Проверка есть ли такой пользователь
             globalUser = await eel.getUser(anwer[1])() //Получение данных о пользователе из массива ответа
             globalId = globalUser[6] //Установка globalId
@@ -239,6 +252,8 @@ async function login(){
             alert.style.display = "none" //Отключение уведомления об ошибке
             document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
             document.location = "#" //Переход на домашнюю страницу
+            modal.getElementsByClassName("login")[0].value = "" //Сброс значений
+            modal.getElementsByClassName("password")[0].value = "" //Сброс значений
         }
         else{ //Если пользователь не был найден
             alert.style.display = "block"

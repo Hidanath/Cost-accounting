@@ -15,7 +15,7 @@ try:
             cursor.execute("SELECT * FROM users")
             print("База пользователей обнаруженна")
         except: #Если выходит ошибка то создаётся база данных по шаблону
-            cursor.execute("CREATE TABLE users(username TEXT, income INTEGER, balance FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            cursor.execute("CREATE TABLE users(name TEXT, login TEXT, password PASSWORD, income INTEGER, balance FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
             print("База пользователей не была обнаруженна поэтому была созданна новая по шаблону")
         
         cursor.close()
@@ -35,7 +35,7 @@ except:
             cursor.execute("SELECT * FROM users")
             print("База пользователей обнаруженна")
         except: #Если выходит ошибка то создаётся база данных по шаблону
-            cursor.execute("CREATE TABLE users(username TEXT, income INTEGER, balance FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            cursor.execute("CREATE TABLE users(name TEXT, login TEXT, password PASSWORD, income INTEGER, balance FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
             print("База пользователей не была обнаруженна поэтому была созданна новая по шаблону")
         
         cursor.close()
@@ -153,34 +153,34 @@ def getUser(id): #Получение данных пользователя
         return data #Отправка ответа в js
 
 @eel.expose
-def setUser(name, username, password, income, date, id): #Обновление значений пользователя
+def setUser(name, login, password, income, date, id): #Обновление значений пользователя
     global balance
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
         cursor.execute("SELECT income FROM users WHERE id = ?", (id, )) #Выборка заработка по id пользователя
         balance -= cursor.fetchall()[0][0] #Отнимаем от баланса цену записи
         db.commit()
-        cursor.execute("UPDATE users SET name = ?, username = ?, password = ?, income = ?, date = ?  WHERE id = ?", (name, username, password, income, date, id, )) #Обновление значений по id 
+        cursor.execute("UPDATE users SET name = ?, login = ?, password = ?, income = ?, date = ?  WHERE id = ?", (name, login, password, income, date, id, )) #Обновление значений по id 
         db.commit()
         balance += float(income) #Прибавляем к балансу цену записи
         updateBalanceInDB(balance, userID) #Обновление значений в бд
         eel.setBalance(balance) #Установка баланса на сайте
 
 @eel.expose
-def newUser(name, username, password, income, date): #Регистрация нового пользователя
+def newUser(name, login, password, income, date): #Регистрация нового пользователя
     with sqlite3.connect("db/database.db"):
         cursor = db.cursor()
-        cursor.execute("INSERT INTO users(name, username, password, income, balance, date) VALUES(?,?,?,?,?,?)", (name, username, password, income, income, date))
+        cursor.execute("INSERT INTO users(name, login, password, income, balance, date) VALUES(?,?,?,?,?,?)", (name, login, password, income, income, date))
         db.commit()
-        cursor.execute("SELECT id FROM users WHERE username = ? AND income = ? AND balance = ? AND date = ? ", (username, income, income, date))
+        cursor.execute("SELECT id FROM users WHERE login = ? AND income = ? AND balance = ? AND date = ? ", (login, income, income, date))
         id = cursor.fetchall()[0][0]
         return id #Отправка в js id пользователя
 
 @eel.expose
-def checkLogin(username, password): #Проверка логина
+def checkLogin(login, password): #Проверка логина
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
-        cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password)) #Выборка id по логину и паролю
+        cursor.execute("SELECT id FROM users WHERE login = ? AND password = ?", (login, password)) #Выборка id по логину и паролю
         info = cursor.fetchall()
         if len(info) == 0: #Если выборка пустая то возвращение False
             return False
@@ -188,10 +188,10 @@ def checkLogin(username, password): #Проверка логина
             return [True, info[0][0]] #Если выборка не пустая то возвращение True и id пользователя
 
 @eel.expose
-def isLoginFree(username): #Проверка свободен ли логин
+def isLoginFree(login): #Проверка свободен ли логин
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
-        cursor.execute("SELECT id FROM users WHERE username = ?", (str(username), )) #Выборка id по логину
+        cursor.execute("SELECT id FROM users WHERE login = ?", (str(login), )) #Выборка id по логину
         info = cursor.fetchall()
         if len(info) == 0: #Если выборка пустая то возвращает True, то есть логин свободен
             return True
