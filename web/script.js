@@ -1,12 +1,12 @@
-let globalId = 0 //Переменная для передачи id между функциями
+let globalLogin = 0 //Переменная для передачи login между функциями
 let globalRowId = 0
 let globalUser = []
 let alerts = 0
 window.onload = async function(){ //При полной загрузке страницы запуск python функции
-    if (localStorage.getItem("id") != null){
-        globalId = localStorage.getItem("id")
-        await eel.start(globalId);
-        globalUser = await eel.getUser(globalId)()
+    if (localStorage.getItem("login") != null){
+        globalLogin = localStorage.getItem("login")
+        await eel.start(globalLogin);
+        globalUser = await eel.getUser(globalLogin)()
         openSettings()
     }
     else{
@@ -112,6 +112,8 @@ async function addNote(){
     }
 }
 
+
+
 async function openSettings(){
     let modal = document.getElementById("modalSettings")
     //Установка значений в поля
@@ -142,9 +144,10 @@ async function setUserValue(){
         alertWarn.style.display = "block" //Отображение уведомления 
     }
     else{
-        await eel.setUser(name, login, password, income, date, globalId) //Установка значений в бд
+        await eel.setUser(name, login, password, income, date, globalUser[1]) //Установка значений в бд
         newMessage("Настройки успешно обновленны") //Отправка нового сообщения
-        globalUser = await eel.getUser(globalId)()
+        globalLogin = login
+        globalUser = await eel.getUser(globalLogin)()
         alertWarn.style.display = "none"
         document.location = "#"
     }
@@ -205,11 +208,12 @@ async function register(){
         modal.getElementsByClassName("alert")[0].style.display = "block"
     }
     else{
-        globalId = await eel.newUser(name, login, password, income, date)() //Создание нового пользователя и получение в ответ его id
-        localStorage.setItem("id", globalId) //Установка id в localstorage
+        await eel.newUser(name, login, password, income, date) //Создание нового пользователя
+        globalLogin = login
+        localStorage.setItem("login", globalLogin) //Установка login в localstorage
         clearTable() //Очистка таблицы
-        await eel.start(globalId) //Вызов python стартовой функции
-        globalUser = await eel.getUser(globalId)() //Получение оставшихся данных пользователя по id
+        await eel.start(globalLogin) //Вызов python стартовой функции
+        globalUser = await eel.getUser(globalLogin)() //Получение оставшихся данных пользователя по login
         modal.getElementsByClassName("alert")[0].display = "none" //Отключение сообщения об ошибке
         document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
         document.location = "#" //Переход на главный экран
@@ -241,13 +245,13 @@ async function login(){
 
     }
     else{
-        let anwer = await eel.checkLogin(login, password)() //Проверка на существование пользователя; ответ массив формата [true, id] или при неправильных данных false
-        if(anwer[0]){ //Проверка есть ли такой пользователь
-            globalUser = await eel.getUser(anwer[1])() //Получение данных о пользователе из массива ответа
-            globalId = globalUser[6] //Установка globalId
-            localStorage.setItem("id", globalId) //Установка id в localstorage
+        let anwer = await eel.checkLogin(login, password)() //Проверка на существование пользователя; ответ true или false
+        if(anwer){ //Проверка есть ли такой пользователь
+            globalUser = await eel.getUser(login)() //Получение данных о пользователе из массива ответа
+            globalLogin = globalUser[1] //Установка globalLogin
+            localStorage.setItem("login", globalLogin) //Установка login в localstorage
             clearTable() //Очистка таблицы
-            await eel.start(globalId) //Запуск python стартовой функции
+            await eel.start(globalLogin) //Запуск python стартовой функции
             
             alert.style.display = "none" //Отключение уведомления об ошибке
             document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
