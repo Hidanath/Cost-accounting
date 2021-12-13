@@ -11,13 +11,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
 </head>
 <body>
     <div class="sidenav">
         <h1 class="balance">0</h1>
         <a href="#modalAdd">Добавить</a>
         <a href="#modalSettings" onclick="openSettings()">Настройки</a>
-        <a href="#modalLogin" onclick="localStorage.removeItem('login'); document.getElementsByClassName('sidenav')[0].style.display = 'none'", style="margin-top: auto;">Выйти</a>
+        <a href="#modalLogin" onclick="exit()"style="margin-top: auto;">Выйти</a>
       </div>
     <div class="main">
             <div class="table-div">
@@ -71,8 +72,11 @@
                     <label for="login">Введите логин:</label>
                     <input type="text" class="login" placeholder="Логин">
 
-                    <label for="password">Введите пароль:</label>
-                    <input type="password" class="password" placeholder="Пароль">
+                    <div class="passwordInput">
+                        <label for="password">Введите пароль:</label>
+                        <input type="password" class="password" placeholder="Пароль">
+                        <span><i class="fas fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
+                    </div>
 
                     <label for="incomeEdit" class="incomeLabel">Введите зарплату:</label>
                     <input type="number" class="incomeEdit" placeholder="Зарплата">
@@ -81,6 +85,7 @@
                     <input type="date" class="dateEdit" placeholder="Дата получения зарплаты">
 
                     <button class="save" onclick="setUserValue()">Сохранить изменения</button>
+                    <button class="delete" onclick="deleteUser()">Удалить аккаунт</button>
                     <button class="close" onclick="document.location = '#'; document.getElementById('modalSettings').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
 
                     <div class="alert"></div>
@@ -93,8 +98,11 @@
                     <label for="login">Введите логин</label>
                     <input type="text" class="login" placeholder="Введите логин">
 
-                    <label for="password">Введите пароль</label>
-                    <input type="password" class="password" placeholder="Введите пароль">
+                    <div class="passwordInput">
+                        <label for="password">Введите пароль</label>
+                        <input type="password" class="password" placeholder="Введите пароль">
+                        <span><i class="fa fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
+                    </div>
 
                     <button class="loginButton" onclick="login()">Войти</button>
                     <button class="loginButton" onclick="document.location = '#modalRegister'">Зарегестрироваться</button>
@@ -111,8 +119,11 @@
                     <label for="loginRegister">Введите логин</label>
                     <input type="text" class="loginRegister" placeholder="Введите логин">
 
-                    <label for="password">Введите пароль</label>
-                    <input type="password" class="password" placeholder="Введите пароль">
+                    <div class="passwordInput">
+                        <label for="password">Введите пароль</label>
+                        <input type="password" class="password" placeholder="Введите пароль">
+                        <span><i class="fa fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
+                    </div>
 
                     <label for="incomeRegister">Введите вашу зарплату</label>
                     <input type="number" class="incomeRegister" placeholder="Введите зарплату">

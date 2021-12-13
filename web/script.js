@@ -103,7 +103,7 @@ async function addNote(){
         alertWarn.style.display = "block" //Отображение уведомления
     }
     else{
-        await eel.add(title.value, price.value)
+        await eel.add(title.value, price.value, globalLogin)
         document.location = "#"
         newMessage("Новая запись успешно созданна") //Отправка нового сообщения
         title.value = ""
@@ -145,6 +145,9 @@ async function setUserValue(){
     }
     else{
         await eel.setUser(name, login, password, income, date, globalUser[1]) //Установка значений в бд
+        if (login != globalLogin[1]){
+            localStorage.setItem("login", login)
+        }
         newMessage("Настройки успешно обновленны") //Отправка нового сообщения
         globalLogin = login
         globalUser = await eel.getUser(globalLogin)()
@@ -153,6 +156,17 @@ async function setUserValue(){
     }
 }
 
+async function deleteUser(){
+    let password = prompt("Для удаления аккаунта введите ваш пароль") //Подтверждение на удаление
+    if(password == globalUser[2]){
+        await eel.deleteUser(globalLogin)
+        document.location = "#modalRegister"
+        exit()
+    }
+    else{
+        document.location = "#"
+    }
+}
 
 
 function newMessage(msg){
@@ -263,5 +277,31 @@ async function login(){
             alert.style.display = "block"
             alert.innerHTML = 'Логин или пароль неверны' 
         }
+    }
+}
+
+function exit(){
+    localStorage.removeItem('login') //Удаление логина из localstorage
+    document.getElementsByClassName('sidenav')[0].style.display = 'none' //Отключение левого меню
+    let messages = document.getElementsByClassName("downAlert") //Поиск всех сообщений
+    messages = Array.from(messages) //Перевод htmlCollection в array
+    messages.map(function(alert){ //Удаление каждого элемента массива
+        return alert.remove()
+    })
+    alerts = 0
+}
+
+//Функция для скрытия/показа пароля; Аргумент родительский div
+function showHidePassword(passwordInput){
+    let input = passwordInput.getElementsByClassName("password")[0]
+    let button = passwordInput.querySelector("span i")
+
+    if (input.type == "password"){
+        input.type = "text"
+        button.classList.add("hide-btn")
+    }
+    else{
+        input.type = "password"
+        button.classList.remove("hide-btn")
     }
 }

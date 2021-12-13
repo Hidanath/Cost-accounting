@@ -223,3 +223,19 @@ input:focus{
 .closebtn:hover {
     color: black;
 }
+
+
+
+.passwordInput span{
+    position: absolute;
+    top: 65%;
+    right: 10px;
+    transform: translateY(-50%);
+  }
+.passwordInput{
+    position: relative;
+}
+
+.passwordInput i.hide-btn::before{
+    content: "\f070";
+}

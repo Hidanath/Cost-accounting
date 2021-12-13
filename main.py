@@ -1,5 +1,5 @@
 import eel, sqlite3, datetime
-from os import mkdir
+from os import curdir, mkdir
 
 try:
     with sqlite3.connect("db/database.db") as db: #Проверка существует ли база данных
@@ -8,7 +8,7 @@ try:
             cursor.execute("SELECT * FROM expenses")
             print("База расходов обнаруженна")
         except: #Если выходит ошибка то создаётся база данных по шаблону
-            cursor.execute("CREATE TABLE expenses(title TEXT, price FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            cursor.execute("CREATE TABLE expenses(title TEXT, price FLOAT, date TEXT, forWhom TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
             print("База расходов не была обнаруженна поэтому была созданна новая по шаблону")
 
         try:
@@ -28,7 +28,7 @@ except:
             cursor.execute("SELECT * FROM expenses")
             print("База расходов обнаруженна")
         except: #Если выходит ошибка то создаётся база данных по шаблону
-            cursor.execute("CREATE TABLE expenses(title TEXT, price FLOAT, date TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
+            cursor.execute("CREATE TABLE expenses(title TEXT, price FLOAT, date TEXT, forWhom TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT)")
             print("База расходов не была обнаруженна поэтому была созданна новая по шаблону")
 
         try:
@@ -53,10 +53,10 @@ def start(login):
         cursor = db.cursor()
 
         #Получение значений из бд
-        cursor.execute("SELECT * FROM expenses")
+        cursor.execute("SELECT * FROM expenses WHERE forWhom = ?", (login, ))
         info = cursor.fetchall()
         for row in info:
-            eel.addToTable(row[0],row[1],row[2],row[3]) #Добавление всех данных из бд
+            eel.addToTable(row[0],row[1],row[2],row[4]) #Добавление всех данных из бд
 
         db.commit()
         #Получение и установка баланса
@@ -108,25 +108,26 @@ def deleteRow(id): #Удаление записи из бд
         eel.setBalance(balance) #Установка баланса на сайте
 
 @eel.expose
-def add(title, price): #Добавление новой записи
+def add(title, price, login): #Добавление новой записи
     global balance
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
         data = (
             str(title),
             float(price),
-            str(datetime.date.today())
+            str(datetime.date.today()),
+            str(login)
         )
-        cursor.execute(f"INSERT INTO expenses(title, price, date) VALUES(?,?,?)", data)
+        cursor.execute(f"INSERT INTO expenses(title, price, date, forWhom) VALUES(?,?,?,?)", data)
         db.commit()
 
         #Получение значений из бд
-        cursor.execute("SELECT * FROM expenses") #Общая выборка по базе
+        cursor.execute("SELECT * FROM expenses WHERE forWhom = ?", (login, )) #Общая выборка по базе
         info = cursor.fetchall() #Получение ответа
         iteration = 0 #Количество итераций
         for row in info: #Перебор ответа
             if iteration == len(info)-1: #Если итерация == последниму элементу то добавление в таблицу новую строку
-                eel.addToTable(row[0],row[1],row[2],row[3]) #Добавление данных из бд
+                eel.addToTable(row[0],row[1],row[2],row[4]) #Добавление данных из бд
             iteration += 1
 
         balance -= float(price) #Отнятие от баланса цены записи
@@ -153,7 +154,7 @@ def getUser(login): #Получение данных пользователя
 
 @eel.expose
 def setUser(name, login, password, income, date, oldLogin): #Обновление значений пользователя
-    global balance
+    global balance, userLogin
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
         cursor.execute("SELECT income FROM users WHERE login = ?", (oldLogin, )) #Выборка заработка по login пользователя
@@ -161,6 +162,12 @@ def setUser(name, login, password, income, date, oldLogin): #Обновлени�
         db.commit()
         cursor.execute("UPDATE users SET name = ?, login = ?, password = ?, income = ?, date = ?  WHERE login = ?", (name, login, password, income, date, oldLogin, )) #Обновление значений по login 
         db.commit()
+
+        if login != oldLogin:
+            cursor.execute("UPDATE expenses SET forWhom = ? WHERE forWhom = ?", (login, oldLogin))
+            db.commit()
+            userLogin = login
+
         balance += float(income) #Прибавляем к балансу цену записи
         updateBalanceInDB(balance, userLogin) #Обновление значений в бд
         eel.setBalance(balance) #Установка баланса на сайте
@@ -171,6 +178,14 @@ def newUser(name, login, password, income, date): #Регистрация нов
         cursor = db.cursor()
         cursor.execute("INSERT INTO users(name, login, password, income, balance, date) VALUES(?,?,?,?,?,?)", (name, login, password, income, income, date))
         db.commit()
+
+@eel.expose
+def deleteUser(login):
+    with sqlite3.connect("db/database.db") as db:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM users WHERE login = ?", (login, ))
+        db.commit()
+        cursor.execute("DELETE FROM expenses WHERE forWhom = ?", (login, ))
 
 @eel.expose
 def checkLogin(login, password): #Проверка пользователя 
