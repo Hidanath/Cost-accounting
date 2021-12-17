@@ -1,139 +1,139 @@
-body{
+body {
     font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
     margin: 0px;
-    background-color: #f3f3f3
-    ;
-  }
-  
-  th {
-      font-weight: normal;
-      background: #343A40;
-      border-top: 4px solid #F9F9F9;
-      border-bottom: 4px solid #F9F9F9;
-      color: #FFF;
-      padding: 8px;
-  }
-  td {
-      background: #FFF;
-      border-bottom: 4px solid #F9F9F9;
-      color: #778397;
-      padding: 8px;
-  }
-  
-  tr:hover td {
-      background: #dcdee3;
-  }
-  
-  table{
-      font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
-      font-size: 35px;
-      background: white;
-      width: 80%;
-      border-collapse: collapse;
-      text-align: left;
-      margin-left: auto;
-      margin-right: auto;
-      overflow: auto;
-  }
-  
-  .table-div{
-      overflow-y: auto;
-      height: 68vh;
-  }
-  
-  .table-div::-webkit-scrollbar {
-      display: none;
-  }
-    
-  .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: rgba(0, 0, 0, .7);
-      width: 100%;
-      height: 100%;
-      align-items: center;
-      justify-content: center;
-  }
-    
-  .modal:target {
-      display: flex;
-  }
-    
-  .modalContent {
-      background-color: #fff;
-      padding: 25px;
-      width: 35%;
-      height: 70%;
-  }
-    
-  
-  input{
-    width:100%;
-    border:2px solid #e2e5eb;
-    border-radius:4px;
-    margin:8px 0;
-    outline:none;
-    padding:8px;
-    box-sizing:border-box;
-    transition:.3s;
+    background-color: #f3f3f3;
+}
+
+th {
+    font-weight: normal;
+    background: #343A40;
+    border-top: 4px solid #F9F9F9;
+    border-bottom: 4px solid #F9F9F9;
+    color: #FFF;
+    padding: 8px;
+}
+
+td {
+    background: #FFF;
+    border-bottom: 4px solid #F9F9F9;
+    color: #778397;
+    padding: 8px;
+}
+
+tr:hover td {
+    background: #dcdee3;
+}
+
+table {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 35px;
+    background: white;
+    width: 80%;
+    border-collapse: collapse;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: auto;
+}
+
+.table-div {
+    overflow-y: auto;
+    height: 68vh;
+}
+
+.table-div::-webkit-scrollbar {
+    display: none;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .7);
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal:target {
+    display: flex;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 25px;
+    width: 35%;
+    height: 70%;
+}
+
+input {
+    width: 100%;
+    border: 2px solid #e2e5eb;
+    border-radius: 4px;
+    margin: 8px 0;
+    outline: none;
+    padding: 8px;
+    box-sizing: border-box;
+    transition: .3s;
     font-size: 16px;
 }
-  
-input:focus{
-    border-color:#aaa;
-    box-shadow:0 0 2px 0 #AAA;
+
+input:focus {
+    border-color: #aaa;
+    box-shadow: 0 0 2px 0 #AAA;
 }
-  
-  button{
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      font-family: sans-serif;
-      letter-spacing: 1px;
-      font-size: 16px;
-      color :#fff ;
-      background-color: #0071f0;
-      outline: none; 
-      cursor: pointer;
-      transition: 0.3s;
-  }
 
-  .delete{
-      background-color: #F34642;
-  }
-  
-  .close{
-      background-color: #FFC107;
-  }
-  
-  .closeModalAdd{
-      background-color: #F34642;    
-  }
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #0071f0;
+    outline: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-  .loginButton{
-      width: 49.6%;
-      height: 45px;
-      margin-top: 10px;
-  }
-  
-  .modalTitle{
-      font-size: 30px;
-      text-align: center;
-      margin: 0px;
-      margin-bottom: 20px;
-  }
-  
-  input::-webkit-outer-spin-button,
-  input::-webkit-inner-spin-button {
+.delete {
+    background-color: #F34642;
+}
+
+.close {
+    background-color: #FFC107;
+}
+
+.closeModalAdd {
+    background-color: #F34642;
+}
+
+.loginButton {
+    width: 49.6%;
+    height: 45px;
+    margin-top: 10px;
+}
+
+.modalTitle {
+    font-size: 30px;
+    text-align: center;
+    margin: 0px;
+    margin-bottom: 20px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-  }
+}
 
 #modalAdd .modalContent .alert {
     padding: 15px;
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
+    /* Red */
     color: white;
     margin-top: 4%;
     border-radius: 12px;
@@ -144,7 +144,8 @@ input:focus{
 
 #modalSettings .modalContent .alert {
     padding: 15px;
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
+    /* Red */
     color: white;
     margin-top: 4%;
     border-radius: 12px;
@@ -155,7 +156,8 @@ input:focus{
 
 #modal1 .modalContent .alert {
     padding: 15px;
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
+    /* Red */
     color: white;
     margin-top: 4%;
     border-radius: 12px;
@@ -166,7 +168,8 @@ input:focus{
 
 #modalRegister .modalContent .alert {
     padding: 15px;
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
+    /* Red */
     color: white;
     margin-top: 4%;
     border-radius: 12px;
@@ -177,7 +180,8 @@ input:focus{
 
 #modalLogin .modalContent .alert {
     padding: 15px;
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
+    /* Red */
     color: white;
     margin-top: 4%;
     border-radius: 12px;
@@ -186,27 +190,72 @@ input:focus{
     font-size: 25px;
 }
 
-#modalLogin{
+#modalLogin {
     background-color: black;
 }
 
-#modalRegister{
+#modalRegister {
     background-color: black;
 }
-.downAlert{
+
+#modalBalance button {
+    margin-right: 5px;
+    width: 210px
+}
+
+.modalSettings .modalContent {
+    padding-top: 0px;
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10 auto;
+    list-style: none;
+    padding-left: 0px;
+}
+
+.menu li {
+    width: 125px;
+    height: 50px;
+    transition: background-position-x 0.9s linear;
+    text-align: center;
+    cursor: pointer;
+}
+
+.menu a {
+    font-size: 22px;
+    color: #777;
+    text-decoration: none;
+}
+
+.menu .active {
+    color: #00AAFF;
+    border-bottom: 2px solid #00AAFF;
+}
+
+.downAlert {
     padding: 22px;
-    background-color: #A7D155; /* Red */
+    background-color: #A7D155;
+    /* Red */
     color: white;
     margin-bottom: 8px;
     width: 20%;
     margin-left: auto;
 }
 
-.newAlert{
-  margin-top: 45px;
+.newAlert {
+    margin-top: 45px;
 }
 
+.balanceTitle {
+    font-size: 16px;
+}
+
+
 /* The close button */
+
 .closebtn {
     margin-left: 15px;
     color: white;
@@ -219,23 +268,24 @@ input:focus{
     line-height: 28px;
 }
 
+
 /* When moving the mouse over the close button */
+
 .closebtn:hover {
     color: black;
 }
 
-
-
-.passwordInput span{
+.passwordInput span {
     position: absolute;
     top: 65%;
     right: 10px;
     transform: translateY(-50%);
-  }
-.passwordInput{
+}
+
+.passwordInput {
     position: relative;
 }
 
-.passwordInput i.hide-btn::before{
+.passwordInput i.hide-btn::before {
     content: "\f070";
 }

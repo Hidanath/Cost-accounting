@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,133 +12,158 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
 </head>
+
 <body>
     <div class="sidenav">
         <h1 class="balance">0</h1>
         <a href="#modalAdd">Добавить</a>
-        <a href="#modalSettings" onclick="openSettings()">Настройки</a>
-        <a href="#modalLogin" onclick="exit()"style="margin-top: auto;">Выйти</a>
-      </div>
+        <a href="#modalSettings" onclick="openSettings(); openAll()">Настройки</a>
+        <a href="#modalLogin" onclick="exit()" style="margin-top: auto;">Выйти</a>
+    </div>
     <div class="main">
-            <div class="table-div">
-                <table>
-                    <tbody>
-                        <tr class="rowExpenses titleRowExpenses">
-                            <th class="title">Название</th>
-                            <th class="price">Цена</th>
-                            <th class="date">Дата</th>
-                            <th class="id">ID</th>
-                        </tr> 
-                </table>
+        <div class="table-div">
+            <table>
+                <tbody>
+                    <tr class="rowExpenses titleRowExpenses">
+                        <th class="title">Название</th>
+                        <th class="price">Цена</th>
+                        <th class="date">Дата</th>
+                        <th class="id">ID</th>
+                    </tr>
+            </table>
+        </div>
+        <div class="modal" id="modal1">
+            <div class="modalContent">
+                <p class="modalTitle">Редактирование записи</p>
+                <label for="titleEdit" , class="titleLabel">Введите название:</label>
+                <input type="text" class="titleEdit" placeholder="Название">
+
+                <label for="priceEdit" class="priceLabel">Введите цену:</label>
+                <input type="number" class="priceEdit" placeholder="Цена">
+
+                <button class="update" onclick="updateValuesInDB()">Обновить запись</button>
+                <button class="delete" onclick="deleteRowJS()">Удалить запись</button>
+                <button class="close" onclick="document.location = '#'; document.getElementById('modal1').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
+
+                <div class="alert"></div>
             </div>
-            <div class="modal" id="modal1">
-                <div class="modalContent">
-                    <p class="modalTitle">Редактирование записи</p>
-                    <label for="titleEdit", class="titleLabel">Введите название:</label>
-                    <input type="text" class="titleEdit" placeholder="Название">
-                    
-                    <label for="priceEdit" class="priceLabel">Введите цену:</label>
-                    <input type="number" class="priceEdit" placeholder="Цена">
-                    
-                    <button class="update" onclick="updateValuesInDB()">Обновить запись</button>
-                    <button class="delete" onclick="deleteRowJS()">Удалить запись</button>
-                    <button class="close" onclick="document.location = '#'; document.getElementById('modal1').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
+        </div>
+        <div class="modal" id="modalAdd">
+            <div class="modalContent">
+                <p class="modalTitle">Добавление записи</p>
+                <label for="titleEdit" , class="titleLabel">Введите название:</label>
+                <input type="text" class="titleEdit" placeholder="Название">
 
-                    <div class="alert"></div>
-                </div>
+                <label for="priceEdit" class="priceLabel">Введите стоимость:</label>
+                <input type="number" class="priceEdit" placeholder="Стоимость">
+
+                <button class="add" onclick="addNote()">Добавить запись</button>
+                <button class="closeModalAdd" onclick="document.location = '#'; document.getElementById('modalAdd').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
+
+                <div class="alert"></div>
             </div>
-            <div class="modal" id="modalAdd">
-                <div class="modalContent">
-                    <p class="modalTitle">Добавление записи</p>
-                    <label for="titleEdit", class="titleLabel">Введите название:</label>
-                    <input type="text" class="titleEdit" placeholder="Название">
-
-                    <label for="priceEdit" class="priceLabel">Введите стоимость:</label>
-                    <input type="number" class="priceEdit" placeholder="Стоимость" >
-
-                    <button class="add" onclick="addNote()">Добавить запись</button>
-                    <button class="closeModalAdd" onclick="document.location = '#'; document.getElementById('modalAdd').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
-
-                    <div class="alert"></div>
-                </div>
-            </div>
-            <div class="modal" id="modalSettings">
-                <div class="modalContent">
-                    <p class="modalTitle">Настройки</p>
+        </div>
+        <div class="modal" id="modalSettings">
+            <div class="modalContent">
+                <p class="modalTitle">Настройки</p>
+                <ul class="menu">
+                    <li><a class="allHref" onclick="openAll()">Общее</a></li>
+                    <li><a class="passwordHref" onclick="openPassword()">Пароль</a></li>
+                    <li><a class="balanceHref" onclick="openBalance()">Баланс</a></li>
+                </ul>
+                <div class="all" style="display: none;">
                     <label for="name">Введите имя:</label>
                     <input type="text" class="name" placeholder="Имя">
-                    
+
                     <label for="login">Введите логин:</label>
                     <input type="text" class="login" placeholder="Логин">
+                </div>
 
+                <div class="password" style="display: none;">
                     <div class="passwordInput">
-                        <label for="password">Введите пароль:</label>
-                        <input type="password" class="password" placeholder="Пароль">
+                        <label for="oldPassword">Введите старый пароль:</label>
+                        <input type="password" class="oldPassword" placeholder="Старый пароль">
                         <span><i class="fas fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
                     </div>
+                    <div class="passwordInput">
+                        <label for="newPassword">Введите новый пароль:</label>
+                        <input type="password" class="newPassword" placeholder="Новый пароль">
+                        <span><i class="fas fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
+                    </div>
+                </div>
 
-                    <label for="incomeEdit" class="incomeLabel">Введите зарплату:</label>
+                <div class="balance" style="display: none; margin-bottom: 8px;">
+
+                    <label for="incomeEdit">Введите зарплату:</label>
                     <input type="number" class="incomeEdit" placeholder="Зарплата">
 
-                    <label for="dateEdit" class="dateLabel">Введите дату получения зарплаты:</label>
+                    <label for="dateEdit">Введите дату получения зарплаты:</label>
                     <input type="date" class="dateEdit" placeholder="Дата получения зарплаты">
 
-                    <button class="save" onclick="setUserValue()">Сохранить изменения</button>
-                    <button class="delete" onclick="deleteUser()">Удалить аккаунт</button>
-                    <button class="close" onclick="document.location = '#'; document.getElementById('modalSettings').getElementsByClassName('alert')[0].style.display = 'none'">Закрыть окно</button>
+                    <label for="action">Ручное изменение баланса:</label>
+                    <input type="number" class="action" placeholder="Введите цену">
 
-                    <div class="alert"></div>
+                    <button onclick="changeBalance(true)">Положить</button>
+                    <button onclick="changeBalance(false)">Снять</button>
                 </div>
+
+                <button class="save" onclick="setUserValue()">Сохранить изменения</button>
+                <button class="delete" onclick="deleteUser()">Удалить аккаунт</button>
+                <button class="close" onclick="closeSettings()">Закрыть окно</button>
+
+                <div class="alert"></div>
             </div>
-            <div class="modal" id="modalLogin">
-                <div class="modalContent">
-                    <p class="modalTitle">Вход</p>
+        </div>
+        <div class="modal" id="modalLogin">
+            <div class="modalContent">
+                <p class="modalTitle">Вход</p>
 
-                    <label for="login">Введите логин</label>
-                    <input type="text" class="login" placeholder="Введите логин">
+                <label for="login">Введите логин:</label>
+                <input type="text" class="login" placeholder="Введите логин">
 
-                    <div class="passwordInput">
-                        <label for="password">Введите пароль</label>
-                        <input type="password" class="password" placeholder="Введите пароль">
-                        <span><i class="fa fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
-                    </div>
-
-                    <button class="loginButton" onclick="login()">Войти</button>
-                    <button class="loginButton" onclick="document.location = '#modalRegister'">Зарегестрироваться</button>
-
-                    <div class="alert"></div>
+                <div class="passwordInput">
+                    <label for="password">Введите пароль:</label>
+                    <input type="password" class="password" placeholder="Введите пароль">
+                    <span><i class="fa fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
                 </div>
+
+                <button class="loginButton" onclick="login()">Войти</button>
+                <button class="loginButton" onclick="document.location = '#modalRegister'">Зарегестрироваться</button>
+
+                <div class="alert"></div>
             </div>
-            <div class="modal" id="modalRegister">
-                <div class="modalContent">
-                    <p class="modalTitle">Регистрация</p>
-                    <label for="name">Введите имя</label>
-                    <input type="text" class="name" placeholder="Введите имя">
+        </div>
+        <div class="modal" id="modalRegister">
+            <div class="modalContent">
+                <p class="modalTitle">Регистрация</p>
+                <label for="name">Введите имя:</label>
+                <input type="text" class="name" placeholder="Введите имя">
 
-                    <label for="loginRegister">Введите логин</label>
-                    <input type="text" class="loginRegister" placeholder="Введите логин">
+                <label for="loginRegister">Введите логин:</label>
+                <input type="text" class="loginRegister" placeholder="Введите логин">
 
-                    <div class="passwordInput">
-                        <label for="password">Введите пароль</label>
-                        <input type="password" class="password" placeholder="Введите пароль">
-                        <span><i class="fa fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
-                    </div>
-
-                    <label for="incomeRegister">Введите вашу зарплату</label>
-                    <input type="number" class="incomeRegister" placeholder="Введите зарплату">
-
-                    <label for="dateRegister">Введите дату получения зарплаты</label>
-                    <input type="date" class="dateRegister" placeholder="Введите дату">
-
-                    <button class="loginButton" onclick="register()">Зарегестрироваться</button>
-                    <button class="loginButton" onclick="document.location = '#modalLogin'">Войти</button>
-
-                    <div class="alert"></div>
+                <div class="passwordInput">
+                    <label for="password">Введите пароль:</label>
+                    <input type="password" class="password" placeholder="Введите пароль">
+                    <span><i class="fa fa-eye" onclick="showHidePassword(this.parentElement.parentElement)"></i></span>
                 </div>
+
+                <label for="incomeRegister">Введите вашу зарплату:</label>
+                <input type="number" class="incomeRegister" placeholder="Введите зарплату">
+
+                <label for="dateRegister">Введите дату получения зарплаты:</label>
+                <input type="date" class="dateRegister" placeholder="Введите дату">
+
+                <button class="loginButton" onclick="register()">Зарегестрироваться</button>
+                <button class="loginButton" onclick="document.location = '#modalLogin'">Войти</button>
+
+                <div class="alert"></div>
             </div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
+
 </html>

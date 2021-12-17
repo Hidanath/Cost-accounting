@@ -209,4 +209,9 @@ def isLoginFree(login): #Проверка свободен ли логин
         else:
             return False #Если в выборке что-то есть, то возвращает False
 
+@eel.expose
+def changeBalance(balance):
+    updateBalanceInDB(balance, userLogin)
+    eel.setBalance(balance)
+
 eel.start("index.html", mode="default")
