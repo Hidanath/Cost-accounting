@@ -48,8 +48,8 @@ function modalEditSetValue(id) {
     let row = document.getElementById(id) //Получение ряда по id 
     let title = row.getElementsByClassName("title") //Получение названия в ряде
     let price = row.getElementsByClassName("price") //Получение цены в ряде
-    let titleEdit = document.getElementsByClassName("titleEdit") //Получение поля редактирования названия в модальном окне 
-    let priceEdit = document.getElementsByClassName("priceEdit") //Получение поля редактирования цены в модальном окне
+    let titleEdit = document.getElementById("modal1").getElementsByClassName("titleEdit") //Получение поля редактирования названия в модальном окне 
+    let priceEdit = document.getElementById("modal1").getElementsByClassName("priceEdit") //Получение поля редактирования цены в модальном окне
     titleEdit[0].value = title[0].textContent //Установка названия в поле редактирования в модальном окне
     priceEdit[0].value = price[0].textContent //Установка цены в поле редактирования в модальном окне
     globalRowId = id
@@ -57,23 +57,40 @@ function modalEditSetValue(id) {
 
 async function updateValuesInDB() {
     let row = document.getElementById(globalRowId) //Получение ряда по id 
-    let lastTitle = row.getElementsByClassName("title")[0].textContent //Получение названия в ряде
-    let lastPrice = row.getElementsByClassName("price")[0].textContent //Получение цены в ряде
-    let title = document.getElementsByClassName("titleEdit")[0].value //Получения значения из поля редактирования названия модального окна
-    let price = document.getElementsByClassName("priceEdit")[0].value //Получения значения из поля редактирования цены модального окна
-    let alertWarn = document.getElementById("modal1").getElementsByClassName("alert")[0] //Получение уведомления для modal1
-    if (lastTitle.trim() == title.trim() && lastPrice.trim() == price.trim()) { //Проверка на идентичность значений
-        alertWarn.innerHTML = "Значения идентичны"
-        alertWarn.style.display = "block" //Отображение уведомления
-    } else if (!title.trim() || !price.trim()) { //Проверка на пустые значения
-        alertWarn.innerHTML = 'Заполните поля "Названия" и "Стоимости"'
-        alertWarn.style.display = "block" //Отображение уведомления
-    } else {
+    let modal = document.getElementById("modal1")
+    let errorSpans = Array.from(modal.getElementsByClassName("errorSpan"))
+    let inputs = Array.from(modal.querySelectorAll("input"))
+    let lastTitle = row.getElementsByClassName("title")[0].textContent.trim() //Получение названия в ряде
+    let lastPrice = row.getElementsByClassName("price")[0].textContent.trim() //Получение цены в ряде
+    let title = inputs[0].value.trim() //Получения значения из поля редактирования названия модального окна
+    let price = inputs[1].value.trim() //Получения значения из поля редактирования цены модального окна
+
+    if (!title) {
+        errorSpans[0].innerHTML = "Укажите название записи"
+        errorSpans[0].style.display = "block"
+        inputs[0].classList.add("errorInput")
+    }
+    else{
+        errorSpans[0].style.display = "none"
+        inputs[0].classList.remove("errorInput")
+    }
+
+
+    if (!price) { //Проверка на пустые значения
+        errorSpans[1].innerHTML = "Укажите стоимость"
+        errorSpans[1].style.display = "block"
+        inputs[1].classList.add("errorInput")
+    }
+    else{
+        errorSpans[1].style.display = "none"
+        inputs[1].classList.remove("errorInput")
+    }
+
+    if((price && title) && (title != lastTitle || price != lastPrice)) {
         await eel.updateValues(title, price, globalRowId) //Вызов python функции для обновления значений
-        document.getElementById(globalRowId).getElementsByClassName("title")[0].textContent = title //Обновления значения названия в таблице
-        document.getElementById(globalRowId).getElementsByClassName("price")[0].textContent = price //Обновления значения цены в таблице
+        row.getElementsByClassName("title")[0].textContent = title //Обновления значения названия в таблице
+        row.getElementsByClassName("price")[0].textContent = price //Обновления значения цены в таблице
         newMessage("Значения обновленны") //Отправка нового сообщения
-        alertWarn.style.display = "none" //Скрытие уведомления
         document.location = "#" //Закрытие модального окна
     }
 }
@@ -89,23 +106,38 @@ async function deleteRowJS() {
     } else {
         document.location = "#" //Закрытие модального окна
     }
-    document.getElementById('modal1').getElementsByClassName('alert')[0].style.display = 'none' //Закрытие уведомления для modal1
 }
 
 async function addNote() {
-    let title = document.getElementsByClassName("titleEdit")[1] //Получения значения из поля редактирования названия модального окна
-    let price = document.getElementsByClassName("priceEdit")[1] //Получения значения из поля редактирования цены модального окна
-    let alertWarn = document.getElementById("modalAdd").getElementsByClassName("alert")[0] //Получение уведомления для modalAdd
-    if (!title.value.trim() || !price.value.trim()) { //Проверка на пустые значения
-        alertWarn.innerHTML = 'Заполните поля "название" и "стоимость"'
-        alertWarn.style.display = "block" //Отображение уведомления
-    } else {
-        await eel.add(title.value, price.value, globalLogin)
+    let inputs = Array.from(document.getElementById("modalAdd").querySelectorAll("input"))
+    let errorSpan = Array.from(document.getElementById("modalAdd").getElementsByClassName("errorSpan")) //Получение уведомления для modalAdd
+    let title = inputs[0].value.trim() //Получения значения из поля редактирования названия модального окна
+    let price = inputs[1].value.trim() //Получения значения из поля редактирования цены модального окна
+    if (!title) { //Проверка на пустые значения
+        inputs[0].classList.add("errorInput")
+        errorSpan[0].innerHTML = 'Укажите название записи'
+        errorSpan[0].style.display = "block" //Отображение уведомления
+    }
+    else{
+        inputs[0].classList.remove("errorInput")
+        errorSpan[0].style.display = "none"
+    }
+
+    if (!price){
+        inputs[1].classList.add("errorInput")
+        errorSpan[1].innerHTML = 'Укажите цену записи'
+        errorSpan[1].style.display = "block" //Отображение уведомления
+    }
+    else{
+        inputs[1].classList.remove("errorInput")
+        errorSpan[1].style.display = "none"
+    }
+
+    if (title && price) {
+        await eel.add(title, price, globalLogin)
         document.location = "#"
         newMessage("Новая запись успешно созданна") //Отправка нового сообщения
-        title.value = ""
-        price.value = ""
-        alertWarn.style.display = "none" //Скрытие уведомления для modalAdd
+
     }
 }
 
@@ -163,35 +195,120 @@ function closeSettings() { //Функция для закрытия настро
     document.getElementById('modalSettings').getElementsByClassName('allHref')[0].classList.remove("active")
     document.getElementById('modalSettings').getElementsByClassName('passwordHref')[0].classList.remove("active")
     document.getElementById('modalSettings').getElementsByClassName('balanceHref')[0].classList.remove("active")
+
+    Array.from(document.getElementById("modalSettings").getElementsByClassName("errorSpan")).map(function(el){
+        el.style.display = "none"
+    })
+    
+    Array.from(document.getElementById("modalSettings").querySelectorAll("input")).map(function(el){
+        el.classList.remove("errorInput")
+    })
 }
 
 async function setUserValue() {
-    let name = document.getElementsByClassName("name")[0].value
-    let login = document.getElementsByClassName("login")[0].value
-    let password = document.getElementsByClassName("password")[0].value
-    let income = document.getElementsByClassName("incomeEdit")[0].value
-    let date = document.getElementsByClassName("dateEdit")[0].value
-    let alertWarn = document.getElementById("modalSettings").getElementsByClassName("alert")[0] //Получение уведомления для modalSettings
-    if (name == globalUser[0] && login == globalUser[1] && password == globalUser[2] && income == globalUser[3] && date == globalUser[5]) {
-        alertWarn.innerHTML = 'Значения идентичны'
-        alertWarn.style.display = "block" //Отображение уведомления
-    } else if (!name.trim() || !income.trim() || !login.trim() || !password.trim()) {
-        alertWarn.innerHTML = 'Заполните поля "Имя", "Логин", "Пароль и "Зарплата"'
-        alertWarn.style.display = "block" //Отображение уведомления
-    } else if (login != globalUser[1] && await eel.isLoginFree(login)() == false) {
-        alertWarn.innerHTML = 'Логин занят'
-        alertWarn.style.display = "block" //Отображение уведомления 
-    } else {
-        await eel.setUser(name, login, password, income, date, globalUser[1]) //Установка значений в бд
-        if (login != globalLogin[1]) {
-            localStorage.setItem("login", login)
-        }
-        newMessage("Настройки успешно обновленны") //Отправка нового сообщения
+    let modal = document.getElementById("modalSettings")
+    let modalAll = modal.getElementsByClassName("all")[0]
+    let modalPassword = modal.getElementsByClassName("password")[0]
+    let modalBalance = modal.getElementsByClassName("balance")[0]
+    let name = modal.getElementsByClassName("name")[0].value.trim()
+    let login = modal.getElementsByClassName("login")[0].value.trim()
+    let oldPassword = modal.getElementsByClassName("oldPassword")[0].value.trim()
+    let newPassword = modal.getElementsByClassName("newPassword")[0].value.trim()
+    let income = modal.getElementsByClassName("incomeEdit")[0].value.trim()
+    let date = modal.getElementsByClassName("dateEdit")[0].value.trim()
+    let update = false
+    
+    // Проверка имени
+    if (name != globalUser[0] && name) {
+        eel.setUserElement(name, "name", globalLogin)
+        update = true
+    }
+    else if (!name){
+        modalAll.getElementsByClassName("name")[0].classList.add("errorInput")
+        modalAll.getElementsByClassName("errorSpan")[0].innerHTML = "Укажите новое имя"
+        modalAll.getElementsByClassName("errorSpan")[0].style.display = "block"
+    }
+    else{
+        modalAll.getElementsByClassName("name")[0].classList.remove("errorInput")
+        modalAll.getElementsByClassName("errorSpan")[0].style.display = "none"
+    }
+    
+    // Проверка логина
+    if (login != globalUser[1] && login) {
+        eel.setUserElement(login, "login", globalLogin)
+        localStorage.setItem("login", login)
         globalLogin = login
+        update = true
+    }
+    else if(!login){
+        modalAll.getElementsByClassName("login")[0].classList.add("errorInput")
+        modalAll.getElementsByClassName("errorSpan")[1].innerHTML = "Укажите новый логин"
+        modalAll.getElementsByClassName("errorSpan")[1].style.display = "block"
+    }
+    else{
+        modalAll.getElementsByClassName("errorSpan")[1].style.display = "none"
+        modalAll.getElementsByClassName("login")[0].classList.remove("errorInput")
+    }
+
+    // Проверка пароля
+    if (newPassword != globalUser[2] && oldPassword == globalUser[2] && oldPassword && newPassword) {
+        eel.setUserElement(password, "password", globalLogin)
+        update = true
+    }
+    else if(oldPassword != globalUser[2] && oldPassword){
+        modalPassword.getElementsByClassName("oldPassword")[0].classList.add("errorInput")
+        modalPassword.getElementsByClassName("errorSpan")[0].innerHTML = "Старый пароль неверный"
+        modalPassword.getElementsByClassName("errorSpan")[0].style.display = "contents"
+    }
+    else if (newPassword == globalUser[2] && newPassword){
+        modalPassword.getElementsByClassName("newPassword")[0].classList.add("errorInput")
+        modalPassword.getElementsByClassName("errorSpan")[1].innerHTML = "Старый и новый пароль одинаковы"
+        modalPassword.getElementsByClassName("errorSpan")[1].style.display = "contents"
+    }
+    else{
+        modalPassword.getElementsByClassName("errorSpan")[0].style.display = "none"
+        modalPassword.getElementsByClassName("errorSpan")[1].style.display = "none"
+        modalPassword.getElementsByClassName("newPassword")[0].classList.remove("errorInput")
+        modalPassword.getElementsByClassName("oldPassword")[0].classList.remove("errorInput")
+    }
+
+    // Проверка заработка
+    if (income != globalUser[3] && income) {
+        eel.setUserElement(income, "income", globalLogin)
+        update = true
+    }
+    else if(!income){
+        modalBalance.getElementsByClassName("incomeEdit")[0].classList.add("errorInput")
+        modalBalance.getElementsByClassName("errorSpan")[0].innerHTML = "Укажите свой доход"
+        modalBalance.getElementsByClassName("errorSpan")[0].style.display = "block"
+    }
+    else{
+        modalBalance.getElementsByClassName("errorSpan")[0].style.display = "none"
+        modalBalance.getElementsByClassName("incomeEdit")[0].classList.remove("errorInput")
+    }
+
+    // Проверка даты
+    if (date != globalUser[5]) {
+        eel.setUserElement(date, "date", globalLogin)
+        update = true
+    }
+
+    if(update){
+        newMessage("Настройки успешно обновленны") //Отправка нового сообщения
         globalUser = await eel.getUser(globalLogin)()
-        alertWarn.style.display = "none"
+        let inputs = Array.from(modal.querySelectorAll("input"))
+        let erorrSpans = Array.from(modal.querySelectorAll("i"))
+        inputs.map(function(el){
+            el.classList.remove("errorInput")
+        })
+
+        erorrSpans.map(function(el){
+            el.style.display = "none"
+        })
+
         document.location = "#"
     }
+
 }
 
 async function deleteUser() {
@@ -239,37 +356,94 @@ function deleteMessage(element) {
 
 async function register() {
     let modal = document.getElementById("modalRegister") //Ссылка на modal окно
-    let name = modal.getElementsByClassName("name")[0].value //Получение имени
-    let login = modal.getElementsByClassName("loginRegister")[0].value //Получение логина
-    let password = modal.getElementsByClassName("password")[0].value //Получение пароля
-    let income = modal.getElementsByClassName("incomeRegister")[0].value //Получение зп
-    let date = modal.getElementsByClassName("dateRegister")[0].value //Получение даты
+    let errorSpans = Array.from(modal.getElementsByClassName("errorSpan"))
+    let inputs = Array.from(modal.querySelectorAll("input"))
+    let name = inputs[0].value.trim() //Получение имени
+    let login = inputs[1].value.trim() //Получение логина
+    let password = inputs[2].value.trim() //Получение пароля
+    let income = inputs[3].value.trim() //Получение зп
+    let date = inputs[4].value.trim() //Получение даты
+    let isLoginFree = null
 
-    let isLoginFree = await eel.isLoginFree(login)() //Проверка свободен ли логин
+    if (login){
+        isLoginFree = await eel.isLoginFree(login)() //Проверка свободен ли логин
+    }
 
-    if (!login.trim() || !password.trim() || !income.trim() || !date.trim() || !name.trim()) { //Проверка на пустые строки
-        modal.getElementsByClassName("alert")[0].innerHTML = "Заполните все поля"
-        modal.getElementsByClassName("alert")[0].style.display = "block"
-    } else if (isLoginFree == false) { //Проверка на занятость логина
-        modal.getElementsByClassName("alert")[0].innerHTML = "Логин занят выберите другой"
-        modal.getElementsByClassName("alert")[0].style.display = "block"
-    } else {
+
+    if (!name) { //Проверка на пустые значения
+        errorSpans[0].style.display = "block"
+        errorSpans[0].innerHTML = 'Укажите ваше имя'
+        inputs[0].classList.add("errorInput")
+    }
+    else{
+        errorSpans[0].style.display = "none"
+        inputs[0].classList.remove("errorInput")
+    }
+
+    if (!login) { //Проверка на пустые значения
+        errorSpans[1].style.display = "block"
+        errorSpans[1].innerHTML = 'Укажите ваш логин'
+        inputs[1].classList.add("errorInput")
+    }
+    else{
+        errorSpans[1].style.display = "none"
+        inputs[1].classList.remove("errorInput")
+    }
+
+    if (!password) { //Проверка на пустые значения
+        errorSpans[2].style.display = "contents"
+        errorSpans[2].innerHTML = 'Укажите ваш пароль'
+        inputs[2].classList.add("errorInput")
+    }
+    else{
+        errorSpans[2].style.display = "none"
+        inputs[2].classList.remove("errorInput")
+    }
+
+    if (!income) { //Проверка на пустые значения
+        errorSpans[3].style.display = "block"
+        errorSpans[3].innerHTML = 'Укажите ваш доход'
+        inputs[3].classList.add("errorInput")
+    }
+    else{
+        errorSpans[3].style.display = "none"
+        inputs[3].classList.remove("errorInput")
+    }
+
+    if (!date) { //Проверка на пустые значения
+        errorSpans[4].style.display = "block"
+        errorSpans[4].innerHTML = 'Укажите дату получения зарплаты'
+        inputs[4].classList.add("errorInput")
+    }
+    else{
+        errorSpans[4].style.display = "none"
+        inputs[4].classList.remove("errorInput")
+    }
+    
+    if (!isLoginFree && login) { //Проверка на занятость логина
+        errorSpans[1].style.display = "block"
+        errorSpans[1].innerHTML = 'Логин занят выберите другой'
+        inputs[1].classList.add("errorInput")
+    } 
+    else if(isLoginFree != null || isLoginFree){
+        errorSpans[1].style.display = "none"
+        inputs[1].classList.remove("errorInput")
+    }
+    
+    if(name && login && password && income && date && isLoginFree){
         await eel.newUser(name, login, password, income, date) //Создание нового пользователя
         globalLogin = login
         localStorage.setItem("login", globalLogin) //Установка login в localstorage
         clearTable() //Очистка таблицы
         await eel.start(globalLogin) //Вызов python стартовой функции
         globalUser = await eel.getUser(globalLogin)() //Получение оставшихся данных пользователя по login
-        modal.getElementsByClassName("alert")[0].display = "none" //Отключение сообщения об ошибке
         document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
         document.location = "#" //Переход на главный экран
 
         //Сброс значений
-        modal.getElementsByClassName("name")[0].value = ""
-        modal.getElementsByClassName("loginRegister")[0].value = ""
-        modal.getElementsByClassName("password")[0].value = ""
-        modal.getElementsByClassName("incomeRegister")[0].value = ""
-        modal.getElementsByClassName("dateRegister")[0].value = ""
+        inputs.map(function(el){
+            el.value = ""
+        })
     }
 }
 
@@ -281,15 +455,32 @@ function clearTable() { // Удаление всех рядов кроме 1, т
 
 async function login() {
     let modal = document.getElementById("modalLogin") //Ссылка на modal окно
-    let login = modal.getElementsByClassName("login")[0].value //Получение логина
-    let password = modal.getElementsByClassName("password")[0].value //Получение пароля
-    let alert = modal.getElementsByClassName("alert")[0] //Сообщение об ошибке
+    let inputs = Array.from(modal.querySelectorAll("input"))
+    let login = inputs[0].value.trim() //Получение логина
+    let password = inputs[1].value.trim() //Получение пароля
+    let errorSpans = Array.from(modal.getElementsByClassName("errorSpan"))
 
-    if (!login.trim() || !password.trim()) { //Проверка на пустые значения
-        alert.style.display = "block"
-        alert.innerHTML = 'Заполните поля "Логин" и "Пароль"'
+    if (!login) { //Проверка на пустые значения
+        errorSpans[0].style.display = "block"
+        errorSpans[0].innerHTML = 'Укажите логин'
+        inputs[0].classList.add("errorInput")
+    }
+    else{
+        errorSpans[0].style.display = "none"
+        inputs[0].classList.remove("errorInput")
+    }
 
-    } else {
+    if(!password){
+        errorSpans[1].style.display = "contents"
+        errorSpans[1].innerHTML = 'Укажите пароль'
+        inputs[1].classList.add("errorInput")
+    }
+    else{
+        errorSpans[1].style.display = "none"
+        inputs[1].classList.remove("errorInput")
+    }
+
+    if(password && login) {
         let anwer = await eel.checkLogin(login, password)() //Проверка на существование пользователя; ответ true или false
         if (anwer) { //Проверка есть ли такой пользователь
             globalUser = await eel.getUser(login)() //Получение данных о пользователе из массива ответа
@@ -298,14 +489,20 @@ async function login() {
             clearTable() //Очистка таблицы
             await eel.start(globalLogin) //Запуск python стартовой функции
 
-            alert.style.display = "none" //Отключение уведомления об ошибке
             document.getElementsByClassName("sidenav")[0].style.display = "flex" //Включение левого меню
             document.location = "#" //Переход на домашнюю страницу
             modal.getElementsByClassName("login")[0].value = "" //Сброс значений
             modal.getElementsByClassName("password")[0].value = "" //Сброс значений
-        } else { //Если пользователь не был найден
-            alert.style.display = "block"
-            alert.innerHTML = 'Логин или пароль неверны'
+
+            errorSpans[1].style.display = "none"
+            inputs[0].classList.remove("errorInput")
+            inputs[1].classList.remove("errorInput")
+        } 
+        else { //Если пользователь не был найден
+            errorSpans[1].style.display = "contents"
+            errorSpans[1].innerHTML = 'Логин или пароль неверен'
+            inputs[0].classList.add("errorInput")
+            inputs[1].classList.add("errorInput")
         }
     }
 }
@@ -324,7 +521,7 @@ function exit() {
 //Функция для скрытия/показа пароля; Аргумент родительский div
 function showHidePassword(passwordInput) {
     let input = passwordInput.getElementsByClassName("password")[0]
-    let button = passwordInput.querySelector("span i")
+    let button = passwordInput.querySelector("i")
 
     if (input.type == "password") {
         input.type = "text"
@@ -336,9 +533,13 @@ function showHidePassword(passwordInput) {
 }
 
 function changeBalance(arg) {
-    modal = document.getElementById("modalSettings")
-    input = modal.getElementsByClassName("action")[0].value
-    if (input.trim()) {
+    let modal = document.getElementById("modalSettings").getElementsByClassName("balance")[0]
+    let errorSpan = modal.getElementsByClassName("errorSpan")[2]
+    let input = modal.getElementsByClassName("action")[0].value.trim()
+    if (input) {
+        modal.getElementsByClassName("action")[0].classList.remove("errorInput")
+        errorSpan.style.display = "none"
+
         if (arg) {
             balance = globalUser[4] + Number(input)
             eel.changeBalance(balance)
@@ -346,12 +547,12 @@ function changeBalance(arg) {
             balance = globalUser[4] - Number(input)
             eel.changeBalance(balance)
         }
-        modal.getElementsByClassName("alert")[0].style.display = "none"
         globalUser[4] = balance
         document.getElementById("modalSettings").getElementsByClassName("action")[0].value = ""
     }
     else{
-        modal.getElementsByClassName("alert")[0].style.display = "block"
-        modal.getElementsByClassName("alert")[0].innerHTML = "Заполните поле"
+        errorSpan.style.display = "block"
+        errorSpan.innerHTML = "Укажите сумму"
+        modal.getElementsByClassName("action")[0].classList.add("errorInput")
     }
 }

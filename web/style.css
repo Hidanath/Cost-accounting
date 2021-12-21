@@ -253,6 +253,15 @@ input::-webkit-inner-spin-button {
     font-size: 16px;
 }
 
+.errorSpan{
+    display: none;
+    font-size: 14px;
+    color: #ff5a4c;
+}
+
+.errorInput{
+    border-color: #ff5a4c;
+}
 
 /* The close button */
 
@@ -286,6 +295,17 @@ input::-webkit-inner-spin-button {
     position: relative;
 }
 
-.passwordInput i.hide-btn::before {
+.passwordInput .passwordInputFlex i.hide-btn::before {
     content: "\f070";
+}
+
+.passwordInputFlex{
+    display: flex;
+    flex-direction: row;
+}
+
+.fa-eye{
+    position: absolute;
+    top:43px;
+    left: 95.5%;
 }

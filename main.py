@@ -42,7 +42,7 @@ except:
 
 eel.init("web")
 balance = 0 #Баланс
-income = 0 #Заработок
+globalIncome = 0 #Заработок
 user = [] #Массив с данными пользователя
 userLogin = 0 #Login пользователя
 
@@ -66,13 +66,13 @@ def start(login):
         eel.setBalance(balance) #Установка баланса на сайте      
 
 def getBalance(login): #Получение баланса и заработка
-    global balance, income
+    global balance, globalIncome
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
         cursor.execute("SELECT balance, income FROM users WHERE login = ?", (login, ))
         info = cursor.fetchall()
         balance = info[0][0] #Баланс
-        income = info[0][1] #Заработок
+        globalIncome = info[0][1] #Заработок
 
 def updateBalanceInDB(balance, login): #Запись нового баланса в бд
     with sqlite3.connect("db/database.db") as db:
@@ -153,22 +153,26 @@ def getUser(login): #Получение данных пользователя
         return data #Отправка ответа в js
 
 @eel.expose
-def setUser(name, login, password, income, date, oldLogin): #Обновление значений пользователя
-    global balance, userLogin
+def setUserElement(element, typeOfElement, login): #Обновление значений пользователя
+    global balance, userLogin, globalIncome
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
-        cursor.execute("SELECT income FROM users WHERE login = ?", (oldLogin, )) #Выборка заработка по login пользователя
-        balance -= cursor.fetchall()[0][0] #Отнимаем от баланса цену записи
+        balance -= globalIncome #Отнимаем от баланса цену записи
+
+        if typeOfElement == "income":
+            globalIncome = float(element)
+
         db.commit()
-        cursor.execute("UPDATE users SET name = ?, login = ?, password = ?, income = ?, date = ?  WHERE login = ?", (name, login, password, income, date, oldLogin, )) #Обновление значений по login 
+        cursor.execute(f"UPDATE users SET {typeOfElement} = ? WHERE login = ?", (element, login)) #Обновление значений по login 
         db.commit()
 
-        if login != oldLogin:
-            cursor.execute("UPDATE expenses SET forWhom = ? WHERE forWhom = ?", (login, oldLogin))
+        if element != login and typeOfElement == "login":
+            cursor.execute("UPDATE expenses SET forWhom = ? WHERE forWhom = ?", (element, login))
             db.commit()
             userLogin = login
 
-        balance += float(income) #Прибавляем к балансу цену записи
+        print("g")
+        balance += float(globalIncome) #Прибавляем к балансу цену записи
         updateBalanceInDB(balance, userLogin) #Обновление значений в бд
         eel.setBalance(balance) #Установка баланса на сайте
 
