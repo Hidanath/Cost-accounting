@@ -15,7 +15,7 @@ try:
             cursor.execute("SELECT * FROM users")
             print("База пользователей обнаруженна")
         except: #Если выходит ошибка то создаётся база данных по шаблону
-            cursor.execute("CREATE TABLE users(name TEXT, login TEXT PRIMARY KEY, password PASSWORD, income INTEGER, balance FLOAT, date TEXT)")
+            cursor.execute("CREATE TABLE users(name TEXT, login TEXT PRIMARY KEY, password PASSWORD, income INTEGER, balance FLOAT, date TEXT, dateOfLastUpdate TEXT, isUpdateBalanceMounth TEXT)")
             print("База пользователей не была обнаруженна поэтому была созданна новая по шаблону")
         
         cursor.close()
@@ -35,7 +35,7 @@ except:
             cursor.execute("SELECT * FROM users")
             print("База пользователей обнаруженна")
         except: #Если выходит ошибка то создаётся база данных по шаблону
-            cursor.execute("CREATE TABLE users(name TEXT, login TEXT PRIMARY KEY, password PASSWORD, income INTEGER, balance FLOAT, date TEXT)")
+            cursor.execute("CREATE TABLE users(name TEXT, login TEXT PRIMARY KEY, password PASSWORD, income INTEGER, balance FLOAT, date TEXT, dateOfLastUpdate TEXT, isUpdateBalanceMounth TEXT)")
             print("База пользователей не была обнаруженна поэтому была созданна новая по шаблону")
         
         cursor.close()
@@ -149,6 +149,11 @@ def getUser(login): #Получение данных пользователя
             data.append(row[3])
             data.append(row[4])
             data.append(row[5])
+            data.append(row[6])
+            if int(row[7]) == True:
+                data.append(True)
+            else:
+                data.append(False)
 
         return data #Отправка ответа в js
 
@@ -171,7 +176,6 @@ def setUserElement(element, typeOfElement, login): #Обновление зна�
             db.commit()
             userLogin = login
 
-        print("g")
         balance += float(globalIncome) #Прибавляем к балансу цену записи
         updateBalanceInDB(balance, userLogin) #Обновление значений в бд
         eel.setBalance(balance) #Установка баланса на сайте
@@ -180,7 +184,7 @@ def setUserElement(element, typeOfElement, login): #Обновление зна�
 def newUser(name, login, password, income, date): #Регистрация нового пользователя 
     with sqlite3.connect("db/database.db"):
         cursor = db.cursor()
-        cursor.execute("INSERT INTO users(name, login, password, income, balance, date) VALUES(?,?,?,?,?,?)", (name, login, password, income, income, date))
+        cursor.execute("INSERT INTO users(name, login, password, income, balance, date, dateOfLastUpdate, isUpdateBalanceMounth) VALUES(?,?,?,?,?,?,?,?)", (name, login, password, income, income, date, None, False))
         db.commit()
 
 @eel.expose

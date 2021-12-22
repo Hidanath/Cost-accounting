@@ -9,6 +9,7 @@
     <script src="eel.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="sidenav.css">
+    <link rel="stylesheet" href="checkbox.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
@@ -114,6 +115,12 @@
                     <label for="dateEdit">Введите дату получения зарплаты:</label>
                     <input type="date" class="dateEdit" placeholder="Дата получения зарплаты">
                     <span class="errorSpan"></span>
+
+                    <div class="checkbox">
+                        <input class="custom-checkbox" type="checkbox" id="isUpdateBalanceMounth">
+                        <label for="isUpdateBalanceMounth">Пополнять баланс каждый месяц</label>
+                    </div>
+                    
 
                     <label for="action">Ручное изменение баланса:</label>
                     <input required type="number" class="action" placeholder="Введите цену">

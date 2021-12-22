@@ -2,11 +2,29 @@ let globalLogin = 0 //Переменная для передачи login меж�
 let globalRowId = 0
 let globalUser = []
 let alerts = 0
+let isUpdateBalanceMounth = false
+let globalLastDate = ""
 window.onload = async function() { //При полной загрузке страницы запуск python функции
     if (localStorage.getItem("login") != null) {
         globalLogin = localStorage.getItem("login")
         await eel.start(globalLogin);
         globalUser = await eel.getUser(globalLogin)()
+        isUpdateBalanceMounth = globalUser[7]
+        
+        if (localStorage.getItem("date") != null){
+            globalLastDate = localStorage.getItem("date")
+            let date = new Date()
+            let lastDate = new Date(globalLastDate)
+            let coefficient = date.getMonth() - lastDate.getMonth() + (12 * (date.getFullYear() - lastDate.getFullYear()))
+            console.log(coefficient)
+    
+            if (coefficient > 0){
+                let balance = globalUser[4] + globalUser[3] * coefficient
+                globalUser[4] = balance
+                setBalance(balance)
+            }
+        }
+
         openSettings()
         openAll()
     } else {
@@ -37,7 +55,6 @@ function addToTable(title, price, date, id) {
 }
 
 eel.expose(setBalance)
-
 function setBalance(balance) {
     document.getElementsByClassName("balance")[0].innerHTML = balance
     globalUser[4] = balance
@@ -150,6 +167,7 @@ async function openSettings() {
     modal.getElementsByClassName("login")[0].value = globalUser[1]
     modal.getElementsByClassName("incomeEdit")[0].value = globalUser[3]
     modal.getElementsByClassName("dateEdit")[0].value = globalUser[5]
+    document.getElementById("isUpdateBalanceMounth").checked = isUpdateBalanceMounth
 }
 
 function openAll() { //Функция для открытия первого элемента настроек
@@ -216,6 +234,7 @@ async function setUserValue() {
     let newPassword = modal.getElementsByClassName("newPassword")[0].value.trim()
     let income = modal.getElementsByClassName("incomeEdit")[0].value.trim()
     let date = modal.getElementsByClassName("dateEdit")[0].value.trim()
+    let checkbox = document.getElementById("isUpdateBalanceMounth").checked
     let update = false
     
     // Проверка имени
@@ -293,11 +312,25 @@ async function setUserValue() {
         update = true
     }
 
+    if (checkbox != isUpdateBalanceMounth){
+        eel.setUserElement(checkbox, "isUpdateBalanceMounth", globalLogin)
+        isUpdateBalanceMounth = checkbox
+        if (isUpdateBalanceMounth){
+            globalLastDate = new Date()
+            globalLastDate = globalLastDate.getFullYear() + "-" + (globalLastDate.getMonth() + 1) + "-" + globalUser[5].split("-")[2]
+            localStorage.setItem("date", globalLastDate)
+        }
+        else{
+            localStorage.removeItem("date", globalLastDate)
+        }
+        update = true
+    }
+
     if(update){
         newMessage("Настройки успешно обновленны") //Отправка нового сообщения
         globalUser = await eel.getUser(globalLogin)()
         let inputs = Array.from(modal.querySelectorAll("input"))
-        let erorrSpans = Array.from(modal.querySelectorAll("i"))
+        let erorrSpans = Array.from(modal.querySelectorAll("span"))
         inputs.map(function(el){
             el.classList.remove("errorInput")
         })
@@ -434,6 +467,7 @@ async function register() {
         await eel.newUser(name, login, password, income, date) //Создание нового пользователя
         globalLogin = login
         localStorage.setItem("login", globalLogin) //Установка login в localstorage
+        localStorage.setItem("date", date) //Установка date в localstorage
         clearTable() //Очистка таблицы
         await eel.start(globalLogin) //Вызов python стартовой функции
         globalUser = await eel.getUser(globalLogin)() //Получение оставшихся данных пользователя по login
@@ -485,6 +519,7 @@ async function login() {
         if (anwer) { //Проверка есть ли такой пользователь
             globalUser = await eel.getUser(login)() //Получение данных о пользователе из массива ответа
             globalLogin = globalUser[1] //Установка globalLogin
+            isUpdateBalanceMounth = globalUser[7]
             localStorage.setItem("login", globalLogin) //Установка login в localstorage
             clearTable() //Очистка таблицы
             await eel.start(globalLogin) //Запуск python стартовой функции
@@ -509,6 +544,7 @@ async function login() {
 
 function exit() {
     localStorage.removeItem('login') //Удаление логина из localstorage
+    localStorage.removeItem('date') //Удаление логина из localstorage
     document.getElementsByClassName('sidenav')[0].style.display = 'none' //Отключение левого меню
     let messages = document.getElementsByClassName("downAlert") //Поиск всех сообщений
     messages = Array.from(messages) //Перевод htmlCollection в array
