@@ -7,7 +7,6 @@ let globalLastDate = ""
 window.onload = async function() { //При полной загрузке страницы запуск python функции
     if (localStorage.getItem("login") != null) {
         globalLogin = localStorage.getItem("login")
-        await eel.start(globalLogin);
         globalUser = await eel.getUser(globalLogin)()
         isUpdateBalanceMounth = globalUser[7]
         
@@ -17,12 +16,20 @@ window.onload = async function() { //При полной загрузке стр
             let lastDate = new Date(globalLastDate)
             let coefficient = date.getMonth() - lastDate.getMonth() + (12 * (date.getFullYear() - lastDate.getFullYear()))
             console.log(coefficient)
-    
+            
             if (coefficient > 0){
                 let balance = globalUser[4] + globalUser[3] * coefficient
                 globalUser[4] = balance
+                
+                globalLastDate = new Date()
+                globalLastDate = globalLastDate.getFullYear() + "-" + (globalLastDate.getMonth() + 1) + "-" + globalUser[5].split("-")[2]
+                localStorage.setItem("date", globalLastDate)
+                
                 setBalance(balance)
+                await eel.changeBalance(balance)
+                await eel.setUserElement(globalLastDate, "dateOfLastUpdate", globalLogin)
             }
+            await eel.start(globalLogin);
         }
 
         openSettings()
@@ -253,7 +260,8 @@ async function setUserValue() {
     }
     
     // Проверка логина
-    if (login != globalUser[1] && login) {
+    let anwer = await eel.checkOnlyLogin(login)() //Проверка на существование пользователя; ответ true или false
+    if (login != globalUser[1] && login && !anwer) {
         eel.setUserElement(login, "login", globalLogin)
         localStorage.setItem("login", login)
         globalLogin = login
@@ -264,6 +272,11 @@ async function setUserValue() {
         modalAll.getElementsByClassName("errorSpan")[1].innerHTML = "Укажите новый логин"
         modalAll.getElementsByClassName("errorSpan")[1].style.display = "block"
     }
+    else if(anwer && login != globalLogin){
+        modalAll.getElementsByClassName("login")[0].classList.add("errorInput")
+        modalAll.getElementsByClassName("errorSpan")[1].innerHTML = "Логин занят выберите другой"
+        modalAll.getElementsByClassName("errorSpan")[1].style.display = "block"
+    }  
     else{
         modalAll.getElementsByClassName("errorSpan")[1].style.display = "none"
         modalAll.getElementsByClassName("login")[0].classList.remove("errorInput")
@@ -271,24 +284,27 @@ async function setUserValue() {
 
     // Проверка пароля
     if (newPassword != globalUser[2] && oldPassword == globalUser[2] && oldPassword && newPassword) {
-        eel.setUserElement(password, "password", globalLogin)
+        eel.setUserElement(newPassword, "password", globalLogin)
         update = true
     }
-    else if(oldPassword != globalUser[2] && oldPassword){
+    if(oldPassword != globalUser[2] && oldPassword){
         modalPassword.getElementsByClassName("oldPassword")[0].classList.add("errorInput")
         modalPassword.getElementsByClassName("errorSpan")[0].innerHTML = "Старый пароль неверный"
         modalPassword.getElementsByClassName("errorSpan")[0].style.display = "contents"
     }
-    else if (newPassword == globalUser[2] && newPassword){
+    else{
+        modalPassword.getElementsByClassName("errorSpan")[0].style.display = "none"
+        modalPassword.getElementsByClassName("oldPassword")[0].classList.remove("errorInput")
+    }
+
+    if (newPassword == globalUser[2] && newPassword){
         modalPassword.getElementsByClassName("newPassword")[0].classList.add("errorInput")
         modalPassword.getElementsByClassName("errorSpan")[1].innerHTML = "Старый и новый пароль одинаковы"
         modalPassword.getElementsByClassName("errorSpan")[1].style.display = "contents"
     }
     else{
-        modalPassword.getElementsByClassName("errorSpan")[0].style.display = "none"
         modalPassword.getElementsByClassName("errorSpan")[1].style.display = "none"
         modalPassword.getElementsByClassName("newPassword")[0].classList.remove("errorInput")
-        modalPassword.getElementsByClassName("oldPassword")[0].classList.remove("errorInput")
     }
 
     // Проверка заработка
@@ -319,6 +335,7 @@ async function setUserValue() {
             globalLastDate = new Date()
             globalLastDate = globalLastDate.getFullYear() + "-" + (globalLastDate.getMonth() + 1) + "-" + globalUser[5].split("-")[2]
             localStorage.setItem("date", globalLastDate)
+            eel.setUserElement(globalLastDate, "dateOfLastUpdate", globalLogin)
         }
         else{
             localStorage.removeItem("date", globalLastDate)
@@ -333,6 +350,7 @@ async function setUserValue() {
         let erorrSpans = Array.from(modal.querySelectorAll("span"))
         inputs.map(function(el){
             el.classList.remove("errorInput")
+            el.value = ""
         })
 
         erorrSpans.map(function(el){
@@ -545,6 +563,7 @@ async function login() {
 function exit() {
     localStorage.removeItem('login') //Удаление логина из localstorage
     localStorage.removeItem('date') //Удаление логина из localstorage
+    globalLastDate = null
     document.getElementsByClassName('sidenav')[0].style.display = 'none' //Отключение левого меню
     let messages = document.getElementsByClassName("downAlert") //Поиск всех сообщений
     messages = Array.from(messages) //Перевод htmlCollection в array

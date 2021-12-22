@@ -207,6 +207,17 @@ def checkLogin(login, password): #Проверка пользователя
             return True #Если выборка не пустая то возвращение True
 
 @eel.expose
+def checkOnlyLogin(login): #Проверка пользователя 
+    with sqlite3.connect("db/database.db") as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT login FROM users WHERE login = ?", (login, )) #Выборка login по логину и паролю
+        info = cursor.fetchall()
+        if len(info) == 0: #Если выборка пустая то возвращение False
+            return False
+        else:
+            return True #Если выборка не пустая то возвращение True
+
+@eel.expose
 def isLoginFree(login): #Проверка свободен ли логин
     with sqlite3.connect("db/database.db") as db:
         cursor = db.cursor()
@@ -218,8 +229,10 @@ def isLoginFree(login): #Проверка свободен ли логин
             return False #Если в выборке что-то есть, то возвращает False
 
 @eel.expose
-def changeBalance(balance):
-    updateBalanceInDB(balance, userLogin)
-    eel.setBalance(balance)
+def changeBalance(balanceINP):
+    global balance
+    balance = balanceINP
+    updateBalanceInDB(balanceINP, userLogin)
+    eel.setBalance(balanceINP)
 
 eel.start("index.html", mode="default")
