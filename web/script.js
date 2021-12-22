@@ -9,6 +9,7 @@ window.onload = async function() { //При полной загрузке стр
         globalLogin = localStorage.getItem("login")
         globalUser = await eel.getUser(globalLogin)()
         isUpdateBalanceMounth = globalUser[7]
+        await eel.start(globalLogin);
         
         if (localStorage.getItem("date") != null){
             globalLastDate = localStorage.getItem("date")
@@ -29,7 +30,6 @@ window.onload = async function() { //При полной загрузке стр
                 await eel.changeBalance(balance)
                 await eel.setUserElement(globalLastDate, "dateOfLastUpdate", globalLogin)
             }
-            await eel.start(globalLogin);
         }
 
         openSettings()
@@ -159,6 +159,8 @@ async function addNote() {
 
     if (title && price) {
         await eel.add(title, price, globalLogin)
+        inputs[0].value = ""
+        inputs[1].value = ""
         document.location = "#"
         newMessage("Новая запись успешно созданна") //Отправка нового сообщения
 
@@ -322,12 +324,6 @@ async function setUserValue() {
         modalBalance.getElementsByClassName("incomeEdit")[0].classList.remove("errorInput")
     }
 
-    // Проверка даты
-    if (date != globalUser[5]) {
-        eel.setUserElement(date, "date", globalLogin)
-        update = true
-    }
-
     if (checkbox != isUpdateBalanceMounth){
         eel.setUserElement(checkbox, "isUpdateBalanceMounth", globalLogin)
         isUpdateBalanceMounth = checkbox
@@ -343,6 +339,19 @@ async function setUserValue() {
         update = true
     }
 
+    // Проверка даты
+    if (date != globalUser[5]) {
+        eel.setUserElement(date, "date", globalLogin)
+        globalUser[5] = date
+        if(checkbox){
+            globalLastDate = new Date()
+            globalLastDate = globalLastDate.getFullYear() + "-" + (globalLastDate.getMonth() + 1) + "-" + globalUser[5].split("-")[2]
+            localStorage.setItem("date", globalLastDate)
+            eel.setUserElement(globalLastDate, "dateOfLastUpdate", globalLogin)
+        }
+        update = true
+    }
+    
     if(update){
         newMessage("Настройки успешно обновленны") //Отправка нового сообщения
         globalUser = await eel.getUser(globalLogin)()
@@ -485,7 +494,6 @@ async function register() {
         await eel.newUser(name, login, password, income, date) //Создание нового пользователя
         globalLogin = login
         localStorage.setItem("login", globalLogin) //Установка login в localstorage
-        localStorage.setItem("date", date) //Установка date в localstorage
         clearTable() //Очистка таблицы
         await eel.start(globalLogin) //Вызов python стартовой функции
         globalUser = await eel.getUser(globalLogin)() //Получение оставшихся данных пользователя по login
